@@ -24,6 +24,7 @@ type cleanCmd struct {
 	dryRun  bool
 	volumes bool
 	force   bool
+	keep    []string
 }
 
 func newClean(d Deps) *cobra.Command {
@@ -60,6 +61,7 @@ It shows what it will remove and asks first, unless --yes is given.`,
 	f.BoolVarP(&cc.dryRun, "dry-run", "n", false, "show what would be removed, and remove nothing")
 	f.BoolVar(&cc.volumes, "volumes", false, "also remove unused Docker volumes (they can hold databases)")
 	f.BoolVar(&cc.force, "force", false, "clean even while a package manager is installing")
+	f.StringArrayVar(&cc.keep, "keep", nil, "leave this node_modules or target folder alone (repeatable)")
 	return cmd
 }
 
@@ -67,7 +69,7 @@ type cleanJSON struct {
 	SchemaVersion int              `json:"schemaVersion"`
 	OlderThan     string           `json:"olderThan"`
 	DryRun        bool             `json:"dryRun"`
-	Plan          []*source.Report `json:"plan"`
+	Plan          []sourceJSON     `json:"plan"`
 	Results       []*source.Result `json:"results"`
 	FreedBytes    int64            `json:"freedBytes"`
 }
@@ -95,6 +97,21 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 		return &exitError{ExitUsage, errors.New("not asking without a terminal; add --yes to clean, or --dry-run to preview")}
 	}
 	reports := scanAll(ctx, cc.d, srcs, o)
+	if len(cc.keep) > 0 {
+		keep := make([]string, 0, len(cc.keep))
+		for _, k := range cc.keep {
+			abs, err := absPath(k)
+			if err != nil {
+				return &exitError{ExitUsage, err}
+			}
+			keep = append(keep, abs)
+		}
+		for _, r := range reports {
+			if source.IsProjects(r.ID) {
+				source.KeepProjects(r, keep)
+			}
+		}
+	}
 	var todo []int
 	var planned int64
 	for i, r := range reports {
@@ -106,7 +123,7 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 	out := cc.d.Out
 	if cc.json && (cc.dryRun || len(todo) == 0) {
 		return writeJSON(out, cleanJSON{SchemaVersion: SchemaVersion, OlderThan: ageLabel(o), DryRun: cc.dryRun,
-			Plan: pick(reports, todo), Results: []*source.Result{}})
+			Plan: withProjects(pick(reports, todo), now), Results: []*source.Result{}})
 	}
 	if len(todo) == 0 {
 		fmt.Fprintln(out, "Nothing to free"+ageSuffix(o)+".")
@@ -161,7 +178,7 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 	}
 	if cc.json {
 		if err := writeJSON(out, cleanJSON{SchemaVersion: SchemaVersion, OlderThan: ageLabel(o),
-			Plan: pick(reports, todo), Results: results, FreedBytes: freed}); err != nil {
+			Plan: withProjects(pick(reports, todo), now), Results: results, FreedBytes: freed}); err != nil {
 			return err
 		}
 	} else {

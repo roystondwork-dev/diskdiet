@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -37,11 +38,29 @@ func newScan(d Deps) *cobra.Command {
 }
 
 type scanJSON struct {
-	SchemaVersion int              `json:"schemaVersion"`
-	OlderThan     string           `json:"olderThan"`
-	Sources       []*source.Report `json:"sources"`
-	Bytes         int64            `json:"bytes"`
-	PrunableBytes int64            `json:"prunableBytes"`
+	SchemaVersion int          `json:"schemaVersion"`
+	OlderThan     string       `json:"olderThan"`
+	Sources       []sourceJSON `json:"sources"`
+	Bytes         int64        `json:"bytes"`
+	PrunableBytes int64        `json:"prunableBytes"`
+}
+
+// sourceJSON is a report plus, for node_modules and target folders, the
+// project folders a clean would remove.
+type sourceJSON struct {
+	*source.Report
+	Projects []source.ProjectInfo `json:"projects,omitempty"`
+}
+
+func withProjects(rs []*source.Report, now time.Time) []sourceJSON {
+	out := make([]sourceJSON, len(rs))
+	for i, r := range rs {
+		out[i] = sourceJSON{Report: r}
+		if source.IsProjects(r.ID) {
+			out[i].Projects = source.Projects(r, now)
+		}
+	}
+	return out
 }
 
 func (sc *scanCmd) run(cmd *cobra.Command, _ []string) error {
@@ -62,7 +81,7 @@ func (sc *scanCmd) run(cmd *cobra.Command, _ []string) error {
 		return writeJSON(sc.d.Out, scanJSON{
 			SchemaVersion: SchemaVersion,
 			OlderThan:     ageLabel(o),
-			Sources:       reports,
+			Sources:       withProjects(reports, o.Now),
 			Bytes:         totalBytes(reports),
 			PrunableBytes: totalPrunable(reports),
 		})

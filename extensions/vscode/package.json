@@ -1,0 +1,232 @@
+{
+  "name": "diskdiet-vscode",
+  "displayName": "diskdiet - Free Developer Disk Space",
+  "description": "See what npm, pnpm, Yarn, pip, Cargo, Go, Gradle and Docker caches and old node_modules use, and free disk space safely. Offers a fix when a command runs out of disk.",
+  "version": "0.5.0",
+  "publisher": "diskdiet",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1c5cab",
+    "theme": "dark"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/roystondwork-dev/diskdiet/blob/main/docs/vscode.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roystondwork-dev/diskdiet.git",
+    "directory": "extensions/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/roystondwork-dev/diskdiet/issues"
+  },
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "disk space",
+    "ENOSPC",
+    "no space left on device",
+    "npm cache",
+    "node_modules",
+    "npkill",
+    "docker",
+    "clean",
+    "cache"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "diskdiet",
+          "title": "diskdiet",
+          "icon": "media/disk.svg"
+        }
+      ]
+    },
+    "views": {
+      "diskdiet": [
+        {
+          "id": "diskdiet.sources",
+          "name": "Disk space"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "diskdiet.sources",
+        "contents": "diskdiet measures the caches developer tools leave behind and old node_modules and target folders.\n[Scan now](command:diskdiet.refresh)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "diskdiet.refresh",
+        "title": "Scan Again",
+        "category": "diskdiet",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "diskdiet.free",
+        "title": "Free Disk Space\u2026",
+        "category": "diskdiet",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "diskdiet.freeSource",
+        "title": "Free\u2026",
+        "category": "diskdiet"
+      },
+      {
+        "command": "diskdiet.reveal",
+        "title": "Reveal in File Manager",
+        "category": "diskdiet"
+      },
+      {
+        "command": "diskdiet.setAge",
+        "title": "Set What Counts as Old\u2026",
+        "category": "diskdiet",
+        "icon": "$(history)"
+      },
+      {
+        "command": "diskdiet.showView",
+        "title": "Show Disk Space",
+        "category": "diskdiet"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "diskdiet.free",
+          "when": "view == diskdiet.sources",
+          "group": "navigation@1"
+        },
+        {
+          "command": "diskdiet.setAge",
+          "when": "view == diskdiet.sources",
+          "group": "navigation@2"
+        },
+        {
+          "command": "diskdiet.refresh",
+          "when": "view == diskdiet.sources",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "diskdiet.freeSource",
+          "when": "view == diskdiet.sources && viewItem == source.cleanable",
+          "group": "inline"
+        },
+        {
+          "command": "diskdiet.freeSource",
+          "when": "view == diskdiet.sources && viewItem == source.cleanable"
+        },
+        {
+          "command": "diskdiet.reveal",
+          "when": "view == diskdiet.sources && viewItem == path"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "diskdiet.freeSource",
+          "when": "false"
+        },
+        {
+          "command": "diskdiet.reveal",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "diskdiet",
+      "properties": {
+        "diskdiet.olderThanDays": {
+          "type": "number",
+          "default": 30,
+          "minimum": 0,
+          "markdownDescription": "Count things unused for this many days as removable. `0` counts everything."
+        },
+        "diskdiet.statusBar": {
+          "type": "string",
+          "enum": [
+            "aboveThreshold",
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Show how much can be freed when it passes `#diskdiet.warnAboveGB#`",
+            "Always show how much can be freed",
+            "Never show it"
+          ],
+          "default": "aboveThreshold",
+          "description": "When to show diskdiet in the status bar."
+        },
+        "diskdiet.warnAboveGB": {
+          "type": "number",
+          "default": 10,
+          "minimum": 0,
+          "markdownDescription": "Notify (once per session) when more than this many GB can be freed. `0` turns it off."
+        },
+        "diskdiet.checkEveryHours": {
+          "type": "number",
+          "default": 6,
+          "minimum": 0,
+          "markdownDescription": "Check in the background this often. `0` checks only at startup and when asked."
+        },
+        "diskdiet.detectDiskFull": {
+          "type": "boolean",
+          "default": true,
+          "description": "When a command in the terminal fails with \"no space left on device\" (ENOSPC), offer to free space. Needs terminal shell integration."
+        },
+        "diskdiet.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the diskdiet binary. Empty uses the one bundled with the extension, else diskdiet on PATH."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run --coverage",
+    "check": "npm run typecheck && npm run lint && npm run test:unit && npm run build",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.5",
+    "@types/vscode": "1.98.0",
+    "@vitest/coverage-v8": "5.1.0",
+    "@vscode/vsce": "4.1.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "ovsx": "1.3.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@vscode/vsce-sign@2.1.0": true,
+    "fsevents": false
+  },
+  "overrides": {
+    "@azure/msal-node": "^7.1.0",
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.1.3",
+    "minimatch": "^11.0.5",
+    "glob": "^14.0.4"
+  }
+}

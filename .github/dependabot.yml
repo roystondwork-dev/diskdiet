@@ -23,6 +23,21 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "build(deps)"
+  - package-ecosystem: npm
+    directory: /extensions/vscode
+    schedule:
+      interval: weekly
+    ignore:
+      # Must match the minimum VS Code in engines.vscode (vsce rejects newer types).
+      - dependency-name: "@types/vscode"
+      # Must match the Node.js major that VS Code's extension host runs.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    groups:
+      vscode-npm-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(deps)"
   - package-ecosystem: github-actions
     directory: /
     schedule:

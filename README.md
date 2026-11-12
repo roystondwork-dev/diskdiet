@@ -52,6 +52,14 @@ step ([details](docs/app.md)):
 - **Windows:** on the SmartScreen warning, click **More info → Run anyway**.
 - **Linux:** `chmod +x diskdiet-app_*.AppImage` and run it.
 
+## VS Code
+
+The diskdiet extension adds a **Disk space** view, a status bar item that appears when
+a lot can be freed, and a **Free Disk Space…** command. When a command in the terminal
+fails with "no space left on device", it offers to free space right there
+([details](docs/vscode.md)). Search **diskdiet** in the Extensions view, or install the
+`.vsix` from the [latest release](https://github.com/roystondwork-dev/diskdiet/releases/latest).
+
 ## AI assistants (MCP)
 
 Let Claude Code, Cursor, VS Code Copilot and other assistants see what is using disk
@@ -98,6 +106,7 @@ diskdiet scan --json                      # for scripts
 | `-y`, `--yes` | Don't ask (for scripts and CI) |
 | `--volumes` | Also remove unused Docker volumes |
 | `--force` | Clean even while a package manager is installing |
+| `--keep DIR` | Leave this `node_modules` or `target` folder alone (repeatable) |
 | `--json` | Machine-readable output |
 
 ## What it cleans, and how
@@ -185,8 +194,7 @@ caches and removes nothing: for trying diskdiet, screenshots and recordings.
 - ~~**v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning~~
 - ~~**v0.4**: pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, target folders~~
 - ~~**v0.5**: an MCP server for AI assistants~~
-- ~~**v0.6**: npm and PyPI packages, the MCP Registry, a Claude Code plugin, winget, demo mode~~
-- **Next**: a VS Code extension
+- ~~**v0.6**: a VS Code extension, npm and PyPI packages, the MCP Registry, a Claude Code plugin, winget, demo mode~~
 
 Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-dev/diskdiet/issues).
 
