@@ -135,7 +135,7 @@ jobs:
             Windows)
               # Per-user install: no administrator prompt.
               wails3 task windows:package VERSION="$VERSION" INSTALL_SCOPE=user
-              src=$(ls build/windows/nsis/*installer.exe) ;;
+              src=$(ls bin/*installer.exe) ;;
             Linux)
               # GTK 3 + WebKit2GTK 4.1 rather than Wails' GTK 4 default: they are on
               # far more distributions, including Ubuntu 22.04.

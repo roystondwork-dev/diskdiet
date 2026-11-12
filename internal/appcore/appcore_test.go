@@ -43,7 +43,7 @@ var (
 		}
 		return abs // has a drive letter on Windows
 	}()
-	now  = time.Date(2026, 11, 12, 10, 0, 0, 0, time.UTC)
+	now = time.Date(2026, 11, 12, 10, 0, 0, 0, time.UTC)
 )
 
 func setup(srcs ...*fakeSource) (*Core, *time.Time, *[]string) {
