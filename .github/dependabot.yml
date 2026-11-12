@@ -13,6 +13,11 @@ updates:
     directory: /app/frontend
     schedule:
       interval: weekly
+    ignore:
+      # svelte-check and the Svelte tooling support TypeScript 5 only; revisit
+      # when they support 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       app-npm-deps:
         patterns: ["*"]
