@@ -1,0 +1,12 @@
+# Coverage gate enforced by `make cover` and CI.
+profile: coverage.out
+
+threshold:
+  file: 70
+  package: 85
+  total: 90
+
+exclude:
+  paths:
+    # main() only wires os.Exit around cli.Execute, which is tested directly.
+    - ^cmd/diskdiet/main\.go$

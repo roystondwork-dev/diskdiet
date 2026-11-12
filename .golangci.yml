@@ -1,0 +1,81 @@
+version: "2"
+
+run:
+  timeout: 5m
+  build-tags:
+    - integration
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errorlint
+    - exhaustive
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - nolintlint
+    - perfsprint
+    - prealloc
+    - revive
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wrapcheck
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+    gosec:
+      excludes:
+        - G115 # integer overflow conversions are range-checked explicitly where they matter
+    nolintlint:
+      # Some directives only apply on some OSes (syscall field widths differ).
+      allow-unused: true
+      require-explanation: true
+      require-specific: true
+    thelper:
+      test:
+        # Inline assertion closures in table tests are not helpers.
+        begin: false
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+        - name: var-naming
+        - name: indent-error-flow
+        - name: unused-parameter
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Unwrap(
+        - errors.Join(
+        - .Err()
+        - filepath.WalkDir(
+      ignore-package-globs:
+        - github.com/roystondwork-dev/diskdiet/*
+  exclusions:
+    generated: lax
+    presets:
+      - std-error-handling
+    rules:
+      - path: (_test\.go|^internal/testutil/)
+        linters:
+          - gosec
+          - wrapcheck
+          - noctx
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/roystondwork-dev/diskdiet
