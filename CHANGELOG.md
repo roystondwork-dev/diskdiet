@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.1.0...v0.2.0) (2026-11-12)
+
+
+### Features
+
+* **app:** desktop app for macOS, Windows and Linux ([#2](https://github.com/roystondwork-dev/diskdiet/issues/2)) ([59d2f05](https://github.com/roystondwork-dev/diskdiet/commit/59d2f0594cb8ce8a5f2d4895ce8ab802af1af16d))
+
 ## 0.1.0 (2026-11-12)
 
 
