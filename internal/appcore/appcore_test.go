@@ -265,3 +265,27 @@ func TestViewProjects(t *testing.T) {
 		t.Errorf("view = %+v", v)
 	}
 }
+
+func TestCleanLock(t *testing.T) {
+	npm := npmSrc()
+	c, _, _ := setup(npm)
+	var lock sync.Mutex
+	c.d.CleanLock = &lock
+	_, _ = c.Scan(context.Background(), ScanRequest{}, nil)
+	lock.Lock()
+	done := make(chan struct{})
+	go func() {
+		_, _ = c.Clean(context.Background(), CleanRequest{IDs: []string{"npm"}}, nil)
+		close(done)
+	}()
+	select {
+	case <-done:
+		t.Fatal("clean ran while the lock was held")
+	case <-time.After(50 * time.Millisecond):
+	}
+	lock.Unlock()
+	<-done
+	if npm.cleaned != 1 {
+		t.Fatal("clean did not run after unlock")
+	}
+}

@@ -56,3 +56,28 @@ each cache:
 app follows the same safety rules as the CLI: it removes only what the scan showed,
 never outside a cache folder, and skips a cache while its package manager is
 installing.
+
+## The menu bar / tray icon
+
+diskdiet keeps a small icon in the macOS menu bar (or the Windows and Linux
+notification area) after you close its window. Every 6 hours it checks your caches
+in the background, and its menu shows how much can be freed.
+
+- **Notify me when** sends a notification when more than 5, 10 (the default), 20 or
+  50 GB can be freed, or never. It reminds you at most once a week, unless the amount
+  grows a lot. On macOS, the amount also appears beside the icon.
+- **Count as old after** chooses 7, 30 (the default) or 90 days for the notifications
+  and automatic cleans.
+- **Clean automatically** (off by default) removes old entries from the npm, Yarn,
+  pnpm and Bun caches every day or every week. It never touches `node_modules` or
+  Docker; those always wait for you to look. You get a notification saying how much it
+  freed.
+- **Open at login** starts diskdiet with only the icon when you log in.
+- **Quit diskdiet** stops it, including the background checks.
+
+Settings are kept in `settings.json` in your user settings folder
+(`~/Library/Application Support/diskdiet` on macOS, `%AppData%\diskdiet` on Windows,
+`~/.config/diskdiet` on Linux).
+
+On Linux, the icon needs a desktop with a system tray (KDE, Cinnamon, Xfce; GNOME
+with the AppIndicator extension).
