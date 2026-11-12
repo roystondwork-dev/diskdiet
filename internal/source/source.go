@@ -154,12 +154,23 @@ func All(env Env) []Source {
 		NewYarn(env),
 		NewPnpm(env),
 		NewBun(env),
+		NewPip(env),
+		NewUV(env),
+		NewCargo(env),
+		NewGo(env),
+		NewGradle(env),
+		NewMaven(env),
+		NewPlaywright(env),
+		NewCypress(env),
+		NewXcode(env),
 		NewDocker(env),
 		NewNodeModules(env),
+		NewTargets(env),
 	}
 }
 
 // IDs lists the IDs of all sources.
 func IDs() []string {
-	return []string{"npm", "yarn", "pnpm", "bun", "docker", "node_modules"}
+	return []string{"npm", "yarn", "pnpm", "bun", "pip", "uv", "cargo", "go", "gradle", "maven",
+		"playwright", "cypress", "xcode", "docker", "node_modules", "target"}
 }

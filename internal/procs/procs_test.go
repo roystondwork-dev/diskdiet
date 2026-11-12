@@ -80,3 +80,24 @@ func TestListReal(t *testing.T) {
 		}
 	}
 }
+
+func TestClassifyMoreTools(t *testing.T) {
+	cases := []struct {
+		p      Proc
+		wantID string
+	}{
+		{Proc{Name: "cargo", Cmdline: []string{"/home/me/.cargo/bin/cargo", "build", "--release"}}, "cargo"},
+		{Proc{Name: "cargo", Cmdline: []string{"cargo", "fmt"}}, ""},
+		{Proc{Name: "go", Cmdline: []string{"/usr/local/go/bin/go", "test", "./..."}}, "go"},
+		{Proc{Name: "go", Cmdline: []string{"go", "version"}}, ""},
+		{Proc{Name: "java", Cmdline: []string{"java", "-cp", "gradle-wrapper.jar", "org.gradle.wrapper.GradleWrapperMain", "build"}}, "gradle"},
+		{Proc{Name: "java", Cmdline: []string{"java", "-Xmx1g", "org.gradle.launcher.daemon.bootstrap.GradleDaemon", "8.5"}}, ""},
+		{Proc{Name: "java", Cmdline: []string{"java", "-classpath", "boot", "org.codehaus.plexus.classworlds.launcher.Launcher", "package"}}, "maven"},
+		{Proc{Name: "java", Cmdline: []string{"java", "-jar", "app.jar"}}, ""},
+	}
+	for _, c := range cases {
+		if id, _ := classify(c.p); id != c.wantID {
+			t.Errorf("classify(%v) = %q, want %q", c.p.Cmdline, id, c.wantID)
+		}
+	}
+}

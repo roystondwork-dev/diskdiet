@@ -229,7 +229,7 @@ func view(r *source.Report, home string, now time.Time) SourceView {
 			v.Locations = append(v.Locations, Location{Display: l}) // e.g. "docker (Docker Desktop)"
 		}
 	}
-	if r.ID == "node_modules" {
+	if source.IsProjects(r.ID) {
 		for _, p := range source.Projects(r, now) {
 			v.Projects = append(v.Projects, Project{
 				Path: p.Path, Display: Tildify(filepath.Dir(p.Path), home),
@@ -300,7 +300,7 @@ func (c *Core) Clean(ctx context.Context, req CleanRequest, progress func(Progre
 		if !slices.Contains(req.IDs, s.ID()) || (r.PrunableBytes == 0 && r.PrunableItems == 0) {
 			continue
 		}
-		if s.ID() == "node_modules" {
+		if source.IsProjects(s.ID()) {
 			source.KeepProjects(r, req.KeepProjects)
 			if r.PrunableItems == 0 {
 				continue

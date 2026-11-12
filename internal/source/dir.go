@@ -15,6 +15,15 @@ type location struct {
 	// child (a package folder or archive) is one entry.
 	files bool
 	skip  func(name string) bool
+	// find, when set, walks root and makes each folder it accepts an entry,
+	// without looking inside it (e.g. Maven's version folders).
+	find func(path, name string) bool
+	// keep names entries that stay whatever their age, such as the newest
+	// version of each browser.
+	keep func(entries []fsx.Entry) map[string]bool
+	// show is the folder to report instead of root, when root is one of
+	// many folders inside a cache.
+	show string
 }
 
 // entryPlan lists the entries to remove under one root.
@@ -33,21 +42,32 @@ func scanLocations(ctx context.Context, r *Report, locs []location, o Options) [
 		}
 		var entries []fsx.Entry
 		var err error
-		if loc.files {
+		switch {
+		case loc.find != nil:
+			entries, err = fsx.Find(ctx, loc.root, fsx.Options{}, loc.find)
+		case loc.files:
 			entries, err = fsx.Files(ctx, loc.root, fsx.Options{})
-		} else {
+		default:
 			entries, err = fsx.Children(ctx, loc.root, fsx.Options{}, loc.skip)
 		}
 		if err != nil && ctx.Err() == nil {
 			r.note("could not read " + loc.root + ": " + err.Error())
 		}
 		r.Found = true
-		r.Locations = appendUnique(r.Locations, loc.root)
+		show := loc.root
+		if loc.show != "" {
+			show = loc.show
+		}
+		r.Locations = appendUnique(r.Locations, show)
+		var keep map[string]bool
+		if loc.keep != nil {
+			keep = loc.keep(entries)
+		}
 		p := entryPlan{root: loc.root}
 		for _, e := range entries {
 			r.Bytes += e.Usage.Bytes
 			r.Items++
-			if o.Old(e.Modified) {
+			if !keep[e.Path] && o.Old(e.Modified) {
 				p.entries = append(p.entries, e)
 				r.PrunableBytes += e.Usage.Exclusive
 				r.PrunableItems++
@@ -102,6 +122,10 @@ func (s *dirSource) Name() string { return s.name }
 func (s *dirSource) Scan(ctx context.Context, o Options) *Report {
 	r := &Report{ID: s.id, Name: s.name}
 	r.plan = scanLocations(ctx, r, s.locate(ctx), o)
+	if r.Items == 0 && len(r.Notes) == 0 {
+		r.Found = false // only empty folders: nothing to show
+		r.Locations = nil
+	}
 	return r
 }
 

@@ -171,7 +171,7 @@ func prunableLabel(r *source.Report) string {
 	if r.Estimate {
 		s = "up to " + s
 	}
-	if r.ID == "node_modules" {
+	if source.IsProjects(r.ID) {
 		s += fmt.Sprintf(" (%d of %d)", r.PrunableItems, r.Items)
 	}
 	return s
@@ -183,7 +183,7 @@ func where(r *source.Report, home string) string {
 		locs[i] = tildify(l, home)
 	}
 	s := strings.Join(locs, ", ")
-	if r.ID == "node_modules" {
+	if source.IsProjects(r.ID) {
 		s = fmt.Sprintf("%d folders under %s", r.Items, s)
 	}
 	return s

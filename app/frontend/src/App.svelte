@@ -8,7 +8,7 @@
     SourceView,
     Summary,
   } from "../bindings/github.com/roystondwork-dev/diskdiet/internal/appcore/models";
-  import { formatBytes, percent } from "./lib/format";
+  import { formatBytes, isProjects, percent } from "./lib/format";
   import FreeBar from "./lib/FreeBar.svelte";
   import SourceRow from "./lib/SourceRow.svelte";
   import ConfirmDialog from "./lib/ConfirmDialog.svelte";
@@ -30,7 +30,7 @@
   let result = $state<CleanSummary | null>(null);
   let error = $state("");
   let version = $state("");
-  // Sources the user unticked, and node_modules folders they chose to keep.
+  // Sources the user unticked, and project folders they chose to keep.
   let unselected: Set<string> = $state(new Set());
   let keepProjects: Set<string> = $state(new Set());
   // Live status of each source while scanning or cleaning.
@@ -42,7 +42,7 @@
   const selected = $derived(cleanable.filter((s) => !unselected.has(s.id)));
 
   function freeFor(s: SourceView): number {
-    if (s.id !== "node_modules") return s.prunableBytes;
+    if (!isProjects(s.id)) return s.prunableBytes;
     return (s.projects ?? []).filter((p) => !keepProjects.has(p.path)).reduce((n, p) => n + p.bytes, 0);
   }
 
@@ -186,7 +186,7 @@
       {/if}
 
       {#if sources.length === 0}
-        <p class="muted empty">No caches found. diskdiet looks for npm, Yarn, pnpm, Bun, Docker and node_modules.</p>
+        <p class="muted empty">No caches found. diskdiet looks for npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Docker, node_modules and target folders.</p>
       {:else}
         <ul class="sources">
           {#each sources as s (s.id)}

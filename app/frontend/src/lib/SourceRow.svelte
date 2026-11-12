@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SourceView } from "../../bindings/github.com/roystondwork-dev/diskdiet/internal/appcore/models";
-  import { formatBytes, idle, describe } from "./format";
+  import { formatBytes, idle, describe, isProjects } from "./format";
 
   let {
     source,
@@ -27,7 +27,7 @@
   const cleanable = $derived(source.prunableBytes > 0 || source.prunableItems > 0);
   const projects = $derived(source.projects ?? []);
   const free = $derived(
-    source.id === "node_modules"
+    isProjects(source.id)
       ? projects.filter((p) => !keepProjects.has(p.path)).reduce((n, p) => n + p.bytes, 0)
       : source.prunableBytes,
   );
@@ -84,13 +84,13 @@
     {#each source.locations ?? [] as loc}
       {#if loc.path}
         <button class="link" onclick={() => onreveal(loc.path)} title="Show in file manager"
-          >{source.id === "node_modules" ? `searched ${loc.display === "~" ? "your home folder" : loc.display}` : loc.display}</button
+          >{isProjects(source.id) ? `searched ${loc.display === "~" ? "your home folder" : loc.display}` : loc.display}</button
         >
       {:else}
         <span class="muted">{loc.display}</span>
       {/if}
     {/each}
-    {#if source.id === "node_modules"}
+    {#if isProjects(source.id)}
       <span class="muted">{source.items} folder{source.items === 1 ? "" : "s"} found</span>
     {/if}
   </div>
