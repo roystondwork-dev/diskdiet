@@ -117,9 +117,10 @@ func TestGo(t *testing.T) {
 	}
 
 	// Without the go command: defaults, GOPATH and GOCACHE=off.
-	env := testEnv(home, "darwin", map[string]string{"GOPATH": "/gp" + string(os.PathListSeparator) + "/other", "GOCACHE": "off"}, nil)
+	gp := filepath.Join(home, "gp")
+	env := testEnv(home, "darwin", map[string]string{"GOPATH": gp + string(os.PathListSeparator) + filepath.Join(home, "other"), "GOCACHE": "off"}, nil)
 	locs := NewGo(env).(*dirSource).locate(context.Background())
-	if len(locs) != 2 || locs[0].root != filepath.Join("/gp", "pkg", "mod") {
+	if len(locs) != 2 || locs[0].root != filepath.Join(gp, "pkg", "mod") {
 		t.Errorf("locs = %+v", locs)
 	}
 	for goos, want := range map[string]string{
