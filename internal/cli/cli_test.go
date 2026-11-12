@@ -455,10 +455,11 @@ func TestMCP(t *testing.T) {
 }
 
 func TestDemoJSONProjectsAndKeep(t *testing.T) {
-	demo := source.Demo("/home/me")
+	home := t.TempDir() // absolute on every OS, as real paths are
+	demo := source.Demo(home)
 	d := func(out *bytes.Buffer) Deps {
 		return Deps{
-			Sources: func() ([]source.Source, string, error) { return demo, "/home/me", nil },
+			Sources: func() ([]source.Source, string, error) { return demo, home, nil },
 			Busy:    func(context.Context) (map[string]string, error) { return nil, nil },
 			Now:     time.Now,
 			In:      strings.NewReader(""), Out: out, Err: io.Discard, Demo: true,
@@ -485,7 +486,8 @@ func TestDemoJSONProjectsAndKeep(t *testing.T) {
 	if code := Execute(context.Background(), d(&out), []string{"clean", "--json", "--dry-run", "--only", "node_modules", "--keep", keep}); code != ExitOK {
 		t.Fatalf("clean exit %d", code)
 	}
-	if strings.Contains(out.String(), keep) || !strings.Contains(out.String(), `"prunableItems": 4`) {
+	quoted, _ := json.Marshal(keep) // as it would appear in the JSON
+	if strings.Contains(out.String(), string(quoted)) || !strings.Contains(out.String(), `"prunableItems": 4`) {
 		t.Fatalf("kept folder still planned: %s", out.String())
 	}
 }
