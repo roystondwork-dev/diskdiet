@@ -22,6 +22,7 @@ fixes:
 # Keep in sync with the exclusions in .testcoverage.yml.
 ignore:
   - cmd/diskdiet/main.go
+  - internal/cli/gendocs
   - app
   - extensions
   - packaging

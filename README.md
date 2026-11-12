@@ -17,6 +17,11 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
 </p>
 
+📖 **Documentation:** <https://roystondwork-dev.github.io/diskdiet/>
+([install](https://roystondwork-dev.github.io/diskdiet/install/) ·
+[disk full?](https://roystondwork-dev.github.io/diskdiet/fix/) ·
+[what it cleans](https://roystondwork-dev.github.io/diskdiet/guide/sources/))
+
 ## Why
 
 Package managers never forget. After a year of `npm install`, the npm cache alone
