@@ -360,7 +360,7 @@ func TestProgress(t *testing.T) {
 		Progress: true,
 	}
 	Execute(context.Background(), d, []string{"clean", "--yes"})
-	if !strings.Contains(h.err.String(), "Scanning npm cache") || !strings.Contains(h.err.String(), "Cleaning npm cache") {
+	if !strings.Contains(h.err.String(), "Scanning 4 sources") || !strings.Contains(h.err.String(), "Cleaning npm cache") {
 		t.Errorf("stderr %q", h.err.String())
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,23 +22,30 @@ type projectSource struct {
 	id     string
 	name   string
 	folder string
-	// marker, when set, must accept the project folder, so that only real
-	// build output is found (a "target" folder could be anything).
-	marker func(project string) bool
+	// finder walks the project folders; sources made together share one, so
+	// the home folder is walked once per scan.
+	finder *projectFinder
+}
+
+// isTarget accepts Rust (Cargo.toml) and Maven (pom.xml) projects: only their
+// target folder is build output (a "target" folder could be anything).
+func isTarget(project string) bool {
+	return fsx.Exists(filepath.Join(project, "Cargo.toml")) || fsx.Exists(filepath.Join(project, "pom.xml"))
 }
 
 // NewNodeModules finds projects' node_modules folders.
-func NewNodeModules(env Env) Source {
-	return &projectSource{env: env, id: "node_modules", name: "node_modules", folder: "node_modules"}
+func NewNodeModules(env Env) Source { return newNodeModules(env, newProjectFinder(env)) }
+
+func newNodeModules(env Env, f *projectFinder) Source {
+	return &projectSource{env: env, id: "node_modules", name: "node_modules", folder: "node_modules", finder: f}
 }
 
-// NewTargets finds the target folders of Rust (Cargo.toml) and Maven (pom.xml)
-// projects; cargo build and mvn package recreate them.
-func NewTargets(env Env) Source {
-	return &projectSource{env: env, id: "target", name: "target folders", folder: "target",
-		marker: func(project string) bool {
-			return fsx.Exists(filepath.Join(project, "Cargo.toml")) || fsx.Exists(filepath.Join(project, "pom.xml"))
-		}}
+// NewTargets finds the target folders of Rust and Maven projects; cargo build
+// and mvn package recreate them.
+func NewTargets(env Env) Source { return newTargets(env, newProjectFinder(env)) }
+
+func newTargets(env Env, f *projectFinder) Source {
+	return &projectSource{env: env, id: "target", name: "target folders", folder: "target", finder: f}
 }
 
 // IsProjects reports whether a source's plan is a list of project folders
@@ -54,14 +62,52 @@ var skipUnderHome = map[string][]string{
 	"windows": {"AppData"},
 }
 
-// find walks roots for node_modules folders. It never descends into hidden
-// folders or into a node_modules it found.
-func (s *projectSource) find(ctx context.Context, roots []string) []string {
-	skip := map[string]bool{}
-	for _, name := range skipUnderHome[s.env.GOOS] {
-		skip[filepath.Join(s.env.Home, name)] = true
+// projectFinder walks the project folders once for node_modules and target
+// folders, and remembers the result for the scan it was asked for.
+type projectFinder struct {
+	env  Env
+	mu   sync.Mutex
+	key  string
+	done chan struct{}
+	hits map[string][]string // folder name → paths
+	// walks counts walks, for tests.
+	walks int
+}
+
+func newProjectFinder(env Env) *projectFinder { return &projectFinder{env: env} }
+
+// find returns the folders called name under roots. Calls with the same roots
+// and scan time share one walk.
+func (f *projectFinder) find(ctx context.Context, roots []string, now time.Time, name string) []string {
+	key := now.String() + "\x00" + strings.Join(roots, "\x00")
+	f.mu.Lock()
+	if f.key != key || f.done == nil {
+		f.key = key
+		f.walks++
+		f.done = make(chan struct{})
+		done := f.done
+		f.mu.Unlock()
+		hits := f.walk(ctx, roots)
+		f.mu.Lock()
+		f.hits = hits
+		close(done)
 	}
-	var found []string
+	done := f.done
+	f.mu.Unlock()
+	<-done
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.hits[name]
+}
+
+// walk finds node_modules folders and the target folders of Rust and Maven
+// projects. It never descends into hidden folders or into what it found.
+func (f *projectFinder) walk(ctx context.Context, roots []string) map[string][]string {
+	skip := map[string]bool{}
+	for _, name := range skipUnderHome[f.env.GOOS] {
+		skip[filepath.Join(f.env.Home, name)] = true
+	}
+	hits := map[string][]string{}
 	for _, root := range roots {
 		_ = filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 			if ctx.Err() != nil {
@@ -77,21 +123,23 @@ func (s *projectSource) find(ctx context.Context, roots []string) []string {
 				return nil
 			}
 			name := d.Name()
-			if name == s.folder && (s.marker == nil || s.marker(filepath.Dir(p))) {
-				found = append(found, p)
-				return fs.SkipDir
-			}
-			if name == "node_modules" {
+			switch {
+			case name == "node_modules":
+				hits[name] = append(hits[name], p)
 				return fs.SkipDir // never look for projects inside dependencies
-			}
-			if hidden(name) || skip[p] {
+			case name == "target" && isTarget(filepath.Dir(p)):
+				hits[name] = append(hits[name], p)
+				return fs.SkipDir
+			case hidden(name) || skip[p]:
 				return fs.SkipDir
 			}
 			return nil
 		})
 	}
-	sort.Strings(found)
-	return found
+	for _, v := range hits {
+		sort.Strings(v)
+	}
+	return hits
 }
 
 // lastTouched is when the project last changed: the newest modification time
@@ -129,7 +177,7 @@ func (s *projectSource) Scan(ctx context.Context, o Options) *Report {
 			r.note("not a folder: " + root)
 		}
 	}
-	dirs := s.find(ctx, r.Locations)
+	dirs := s.finder.find(ctx, r.Locations, o.Now, s.folder)
 	entries := make([]fsx.Entry, len(dirs))
 	// Hard-link counts are costly on Windows, where pnpm users are rarer.
 	opts := fsx.Options{CountLinks: s.env.GOOS != "windows"}

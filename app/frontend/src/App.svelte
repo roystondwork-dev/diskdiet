@@ -128,6 +128,7 @@
     <div class="brand" title={version && version !== "dev" ? `diskdiet ${version}` : "diskdiet"}>
       <span class="logo" aria-hidden="true"></span>
       <span>diskdiet</span>
+      {#if summary?.demo}<span class="demo" title="DISKDIET_DEMO is set: made-up data, nothing is removed">Demo data</span>{/if}
     </div>
     <div class="controls" style="--wails-draggable: no-drag">
       <span class="label" id="age-label">Count as old</span>
@@ -282,6 +283,14 @@
     gap: 8px;
     font-weight: 600;
     font-size: 15px;
+  }
+  .demo {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--track);
+    color: var(--on-track);
   }
   .logo {
     width: 18px;

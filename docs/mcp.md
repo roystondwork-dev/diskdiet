@@ -7,9 +7,16 @@ when you ask. Ask things like *"my disk is almost full, what's taking space?"* o
 
 ## Set up
 
-diskdiet must be installed and on your `PATH` (see the [README](../README.md#install)).
+Use `diskdiet mcp` if diskdiet is installed (see the [README](../README.md#install)),
+or `npx -y diskdiet mcp` to run it with nothing installed but Node.js.
 
-**Claude Code**
+**Claude Code**: the plugin adds the tools and a skill:
+
+```
+/plugin install diskdiet --marketplace roystondwork-dev/diskdiet
+```
+
+or just the tools:
 
 ```sh
 claude mcp add diskdiet -- diskdiet mcp

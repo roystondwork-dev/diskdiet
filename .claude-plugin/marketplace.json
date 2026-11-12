@@ -1,0 +1,15 @@
+{
+  "name": "diskdiet",
+  "description": "diskdiet for Claude Code: find and free the disk space developer tools use",
+  "owner": {
+    "name": "Royston D",
+    "url": "https://github.com/roystondwork-dev"
+  },
+  "plugins": [
+    {
+      "name": "diskdiet",
+      "source": "./extensions/claude-code",
+      "description": "See what package caches, Docker and old node_modules or target folders use disk space, and free it safely: diskdiet's MCP tools plus a skill that tells Claude when to use them."
+    }
+  ]
+}

@@ -62,11 +62,22 @@ jobs:
         id: skip
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          WINGET_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
+          WINGET_SUBMIT: ${{ vars.WINGET_SUBMIT }}
         run: |
+          skip=""
           if [ -z "$TAP_TOKEN" ]; then
             echo "::warning::HOMEBREW_TAP_GITHUB_TOKEN is not set; skipping Homebrew and Scoop publishing"
-            echo "args=--skip=homebrew,scoop" >> "$GITHUB_OUTPUT"
+            skip="homebrew,scoop"
           fi
+          if [ -z "$WINGET_TOKEN" ]; then
+            echo "::warning::WINGET_GITHUB_TOKEN is not set; skipping the winget submission"
+            skip="${skip:+$skip,}winget"
+          elif [ "$WINGET_SUBMIT" != "true" ]; then
+            echo "::notice::winget submissions are paused (repository variable WINGET_SUBMIT is not \"true\")"
+            skip="${skip:+$skip,}winget"
+          fi
+          if [ -n "$skip" ]; then echo "args=--skip=$skip" >> "$GITHUB_OUTPUT"; fi
       - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           version: "~> v2"
@@ -74,6 +85,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
@@ -83,6 +95,65 @@ jobs:
             dist/*.rpm
             dist/*.apk
             dist/checksums.txt
+
+  packages:
+    # npm (`npx diskdiet`), PyPI (`pipx install diskdiet`) and the MCP Registry.
+    # All three log in with GitHub OIDC: no tokens are stored. Each step may fail
+    # (e.g. trusted publishing not set up yet) without failing the release.
+    needs: [release-please, goreleaser]
+    if: needs.release-please.outputs.release_created == 'true' && needs.goreleaser.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write      # trusted publishing to npm and PyPI; MCP Registry login
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - name: Download and verify the release archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$TAG" -D "$RUNNER_TEMP/assets" -p checksums.txt -p checksums.txt.sigstore.json -p 'diskdiet_*.tar.gz' -p 'diskdiet_*.zip'
+          # The binaries go into the wheels and the npm checksums, so check they are the signed release's.
+          cosign verify-blob "$RUNNER_TEMP/assets/checksums.txt" \
+            --bundle "$RUNNER_TEMP/assets/checksums.txt.sigstore.json" \
+            --certificate-identity "https://github.com/${{ github.repository }}/.github/workflows/release.yml@refs/heads/main" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      - name: Build the wheels
+        run: python3 packaging/pypi/build_wheels.py "${TAG#v}" "$RUNNER_TEMP/assets" "$RUNNER_TEMP/wheels"
+      - name: Publish to PyPI
+        continue-on-error: true
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: ${{ runner.temp }}/wheels
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Publish to npm
+        id: npm
+        continue-on-error: true
+        working-directory: packaging/npm
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::packaging/npm/package.json has $version, expected ${TAG#v} (release-please keeps them in sync)"
+            exit 1
+          fi
+          node scripts/checksums.js "$version" "$RUNNER_TEMP/assets/checksums.txt"
+          npm test
+          # Trusted publishing needs npm 11.5.1 or later; Node 24 ships it.
+          npm publish --access public
+      # The MCP Registry lists `npx diskdiet mcp`; it checks server.json against
+      # the npm package's mcpName, so it runs after npm.
+      - name: Publish to the MCP Registry
+        if: steps.npm.outcome == 'success'
+        continue-on-error: true
+        run: scripts/mcp-publish.sh
 
   app:
     needs: [release-please, goreleaser]

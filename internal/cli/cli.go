@@ -41,6 +41,8 @@ type Deps struct {
 	Interactive bool
 	// Progress reports whether Err is a terminal that can show progress.
 	Progress bool
+	// Demo means the sources are made up (DISKDIET_DEMO=1).
+	Demo bool
 }
 
 // SystemDeps uses the real machine and standard streams.
@@ -51,9 +53,13 @@ func SystemDeps() Deps {
 			if err != nil {
 				return nil, "", err
 			}
+			if source.DemoEnabled(env.Getenv) {
+				return source.Demo(env.Home), env.Home, nil
+			}
 			return source.All(env), env.Home, nil
 		},
 		Busy:        procs.Busy,
+		Demo:        source.DemoEnabled(os.Getenv),
 		Now:         time.Now,
 		In:          os.Stdin,
 		Out:         os.Stdout,
@@ -222,12 +228,13 @@ func newVersion(d Deps) *cobra.Command {
 
 // scanAll scans sources concurrently, keeping their order.
 func scanAll(ctx context.Context, d Deps, srcs []source.Source, o source.Options) []*source.Report {
+	if d.Demo {
+		fmt.Fprintln(d.Err, "diskdiet: demo mode (DISKDIET_DEMO): made-up data, nothing is removed")
+	}
 	if d.Progress {
-		names := make([]string, len(srcs))
-		for i, s := range srcs {
-			names[i] = s.Name()
-		}
-		fmt.Fprintf(d.Err, "Scanning %s…", strings.Join(names, ", "))
+		// One short line, so that clearing it with \r works (a wrapped line
+		// would leave its first part behind).
+		fmt.Fprintf(d.Err, "Scanning %d sources…", len(srcs))
 		defer fmt.Fprint(d.Err, "\r\033[K")
 	}
 	reports := make([]*source.Report, len(srcs))
