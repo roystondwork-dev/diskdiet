@@ -195,7 +195,7 @@ Run without a command, diskdiet scans and changes nothing.`,
 		RunE:          sc.run,
 	}
 	sc.register(root)
-	root.AddCommand(newScan(d), newClean(d), newVersion(d))
+	root.AddCommand(newScan(d), newClean(d), newMCP(d), newVersion(d))
 	root.CompletionOptions.HiddenDefaultCmd = true
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error { return &exitError{ExitUsage, err} })
 	return root

@@ -289,3 +289,15 @@ func TestCleanLock(t *testing.T) {
 		t.Fatal("clean did not run after unlock")
 	}
 }
+
+func TestScanOnlyAndProjects(t *testing.T) {
+	npm, docker := npmSrc(), dockerSrc()
+	c, _, _ := setup(npm, docker)
+	sum, err := c.Scan(context.Background(), ScanRequest{Only: []string{"npm"}, Projects: []string{home}}, nil)
+	if err != nil || len(sum.Sources) != 1 || sum.Sources[0].ID != "npm" {
+		t.Fatalf("summary = %+v, %v", sum, err)
+	}
+	if len(npm.opts.Projects) != 1 || !docker.opts.Now.IsZero() {
+		t.Errorf("npm opts = %+v; docker scanned = %v", npm.opts, !docker.opts.Now.IsZero())
+	}
+}

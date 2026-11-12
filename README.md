@@ -65,6 +65,19 @@ step ([details](docs/app.md)):
 - **Windows:** on the SmartScreen warning, click **More info → Run anyway**.
 - **Linux:** `chmod +x diskdiet-app_*.AppImage` and run it.
 
+## AI assistants (MCP)
+
+Let Claude Code, Cursor, VS Code Copilot and other assistants see what is using disk
+space and free it when you ask:
+
+```sh
+claude mcp add diskdiet -- diskdiet mcp
+```
+
+`scan_disk_usage` changes nothing; `free_disk_space` removes only what the scan
+showed, for the sources you choose, and asks you to confirm
+([details](docs/mcp.md)).
+
 ## Usage
 
 ```sh
@@ -160,7 +173,8 @@ is signed with cosign (keyless) and releases include SBOMs and build provenance.
 - ~~**v0.2**: a desktop app for macOS, Windows and Linux~~
 - ~~**v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning~~
 - ~~**v0.4**: pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, target folders~~
-- **Next**: an MCP server and a VS Code extension, like [portcheck](https://github.com/roystondwork-dev/portcheck)
+- ~~**v0.5**: an MCP server for AI assistants~~
+- **Next**: a VS Code extension and a Claude Code plugin, like [portcheck](https://github.com/roystondwork-dev/portcheck)
 
 Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-dev/diskdiet/issues).
 

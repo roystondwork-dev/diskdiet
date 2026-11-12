@@ -79,6 +79,11 @@ type ScanRequest struct {
 	OlderThanDays int `json:"olderThanDays"`
 	// Volumes counts unused Docker volumes as removable.
 	Volumes bool `json:"volumes"`
+	// Only limits the scan to these source IDs; empty means all.
+	Only []string `json:"only,omitempty"`
+	// Projects are the folders searched for node_modules and target folders;
+	// empty means the home folder.
+	Projects []string `json:"projects,omitempty"`
 }
 
 // Location is a folder the window shows.
@@ -155,12 +160,21 @@ func (c *Core) Scan(ctx context.Context, req ScanRequest, progress func(Progress
 	if req.OlderThanDays < 0 {
 		return nil, fmt.Errorf("olderThanDays must not be negative, got %d", req.OlderThanDays)
 	}
-	srcs, home, err := c.d.Sources()
+	all, home, err := c.d.Sources()
 	if err != nil {
 		return nil, err
 	}
+	srcs := all
+	if len(req.Only) > 0 {
+		srcs = nil
+		for _, s := range all {
+			if slices.Contains(req.Only, s.ID()) {
+				srcs = append(srcs, s)
+			}
+		}
+	}
 	now := c.d.Now()
-	o := source.Options{Now: now, Age: time.Duration(req.OlderThanDays) * 24 * time.Hour, Volumes: req.Volumes}
+	o := source.Options{Now: now, Age: time.Duration(req.OlderThanDays) * 24 * time.Hour, Volumes: req.Volumes, Projects: req.Projects}
 
 	report := progressFunc(progress)
 	reports := make([]*source.Report, len(srcs))
