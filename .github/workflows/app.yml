@@ -106,9 +106,24 @@ jobs:
       - name: NSIS (Windows installer)
         if: runner.os == 'Windows'
         shell: bash
+        # A fixed version, and Chocolatey refuses packages without checksums.
         run: |
-          command -v makensis || choco install nsis -y --no-progress
+          command -v makensis || choco install nsis --version 3.13.0 --require-checksums -y --no-progress
           echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
+      - name: linuxdeploy (Linux AppImage), pinned and verified
+        if: runner.os == 'Linux'
+        # wails3 would otherwise download linuxdeploy's moving "continuous"
+        # build unchecked; it uses this file when it is already in place.
+        env:
+          LINUXDEPLOY_VERSION: 1-alpha-20251107-1
+          LINUXDEPLOY_SHA256: c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d
+        run: |
+          dir=app/build/linux/appimage/build
+          mkdir -p "$dir"
+          curl -fsSL -o "$dir/linuxdeploy-x86_64.AppImage" \
+            "https://github.com/linuxdeploy/linuxdeploy/releases/download/${LINUXDEPLOY_VERSION}/linuxdeploy-x86_64.AppImage"
+          echo "${LINUXDEPLOY_SHA256}  $dir/linuxdeploy-x86_64.AppImage" | sha256sum -c -
+          chmod +x "$dir/linuxdeploy-x86_64.AppImage"
       - name: Install Wails
         shell: bash
         # On Linux, build against GTK 3 and WebKit2GTK 4.1 (see the Package step).
