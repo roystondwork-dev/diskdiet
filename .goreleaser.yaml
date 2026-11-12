@@ -115,6 +115,43 @@ scoops:
       name: diskdiet-release-bot
       email: roystondwork-dev@users.noreply.github.com
 
+winget:
+  # GoReleaser writes the manifest to our fork of microsoft/winget-pkgs and opens a
+  # pull request upstream, where Microsoft validates and merges it.
+  - name: diskdiet
+    package_identifier: roystondwork-dev.diskdiet
+    publisher: Royston D
+    publisher_url: https://github.com/roystondwork-dev
+    publisher_support_url: https://github.com/roystondwork-dev/diskdiet/issues
+    author: Royston D and diskdiet contributors
+    homepage: https://github.com/roystondwork-dev/diskdiet
+    short_description: See where your developer disk space went, and get it back safely.
+    description: |-
+      diskdiet measures the caches developer tools leave behind (npm, Yarn, pnpm, Bun,
+      pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Docker) and the
+      node_modules and target folders of projects you haven't touched, then removes only
+      what hasn't been used lately, after showing the list and asking.
+    license: MIT
+    license_url: https://github.com/roystondwork-dev/diskdiet/blob/main/LICENSE
+    copyright: Copyright (c) 2026 Royston D and diskdiet contributors
+    release_notes_url: "https://github.com/roystondwork-dev/diskdiet/releases/tag/{{ .Tag }}"
+    tags: [disk-space, cache, cleanup, npm, node-modules, docker, cli, developer-tools]
+    commit_author:
+      name: diskdiet-release-bot
+      email: roystondwork-dev@users.noreply.github.com
+    repository:
+      owner: roystondwork-dev
+      name: winget-pkgs
+      branch: "diskdiet-{{ .Version }}"
+      token: "{{ .Env.WINGET_GITHUB_TOKEN }}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+
 release:
   github:
     owner: roystondwork-dev

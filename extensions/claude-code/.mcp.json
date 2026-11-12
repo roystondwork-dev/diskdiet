@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "diskdiet": {
+      "command": "npx",
+      "args": ["-y", "diskdiet", "mcp"]
+    }
+  }
+}

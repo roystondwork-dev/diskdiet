@@ -149,6 +149,7 @@ type Source interface {
 
 // All returns every source, in display order.
 func All(env Env) []Source {
+	projects := newProjectFinder(env) // one walk for node_modules and target folders
 	return []Source{
 		NewNPM(env),
 		NewYarn(env),
@@ -164,8 +165,8 @@ func All(env Env) []Source {
 		NewCypress(env),
 		NewXcode(env),
 		NewDocker(env),
-		NewNodeModules(env),
-		NewTargets(env),
+		newNodeModules(env, projects),
+		newTargets(env, projects),
 	}
 }
 

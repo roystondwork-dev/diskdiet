@@ -22,20 +22,7 @@ handle one tool.
 diskdiet shows the whole picture first, then removes only what you haven't used
 lately: by default, anything unchanged for 30 days.
 
-```console
-$ diskdiet
-WHAT           SIZE      CAN FREE           WHERE
-npm cache      41.3 GB   33.8 GB            ~/.npm
-Docker         14.6 GB   up to 9.2 GB       docker (Docker Desktop)
-node_modules   11.2 GB   7.9 GB (23 of 41)  41 folders under ~
-pnpm store     6.1 GB    up to 1.4 GB       ~/Library/pnpm/store/v10
-Yarn cache     2.4 GB    1.9 GB             ~/Library/Caches/Yarn/v6
-  • Docker: 3.1 GB in unused volumes is kept; add --volumes to remove them (volumes can hold databases)
-Not found: Bun cache
-
-Total 75.6 GB, of which about 54.2 GB can be freed (older than 30d).
-Run `diskdiet clean` to free it; you'll see the list and be asked first.
-```
+<p align="center"><img alt="diskdiet scanning and cleaning (made-up demo data)" src="docs/assets/demo.gif" width="800"></p>
 
 ## Desktop app
 
@@ -77,6 +64,16 @@ claude mcp add diskdiet -- diskdiet mcp
 `scan_disk_usage` changes nothing; `free_disk_space` removes only what the scan
 showed, for the sources you choose, and asks you to confirm
 ([details](docs/mcp.md)).
+
+### Claude Code plugin
+
+The plugin adds the MCP tools and a skill that tells Claude when to use them, so "my
+disk is full" or "no space left on device" gets diagnosed and fixed in the
+conversation, asking before anything is removed:
+
+```
+/plugin install diskdiet --marketplace roystondwork-dev/diskdiet
+```
 
 ## Usage
 
@@ -144,6 +141,12 @@ A removed `node_modules` comes back with `npm install` (or `yarn`, `pnpm i`, `bu
 ## Install
 
 ```sh
+# npm (any OS): run it without installing
+npx diskdiet
+
+# PyPI (any OS)
+pipx install diskdiet          # or: uv tool install diskdiet
+
 # Go 1.26+
 go install github.com/roystondwork-dev/diskdiet/cmd/diskdiet@latest
 
@@ -153,11 +156,19 @@ brew install roystondwork-dev/tap/diskdiet
 # Scoop (Windows)
 scoop bucket add roystondwork-dev https://github.com/roystondwork-dev/scoop-bucket
 scoop install diskdiet
+
+# winget (Windows)
+winget install roystondwork-dev.diskdiet
 ```
 
 Archives, `.deb`, `.rpm` and `.apk` packages for amd64 and arm64 are on the
 [releases page](https://github.com/roystondwork-dev/diskdiet/releases). The checksum file
 is signed with cosign (keyless) and releases include SBOMs and build provenance.
+
+## Demo mode
+
+`DISKDIET_DEMO=1 diskdiet` (or the app started with `DISKDIET_DEMO=1`) shows made-up
+caches and removes nothing: for trying diskdiet, screenshots and recordings.
 
 ## Exit codes
 
@@ -174,7 +185,8 @@ is signed with cosign (keyless) and releases include SBOMs and build provenance.
 - ~~**v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning~~
 - ~~**v0.4**: pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, target folders~~
 - ~~**v0.5**: an MCP server for AI assistants~~
-- **Next**: a VS Code extension and a Claude Code plugin, like [portcheck](https://github.com/roystondwork-dev/portcheck)
+- ~~**v0.6**: npm and PyPI packages, the MCP Registry, a Claude Code plugin, winget, demo mode~~
+- **Next**: a VS Code extension
 
 Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-dev/diskdiet/issues).
 

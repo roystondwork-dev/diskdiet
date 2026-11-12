@@ -103,6 +103,26 @@
           "type": "json",
           "path": "app/frontend/package-lock.json",
           "jsonpath": "$.packages[''].version"
+        },
+        {
+          "type": "json",
+          "path": "packaging/npm/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "server.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "server.json",
+          "jsonpath": "$.packages[0].version"
+        },
+        {
+          "type": "json",
+          "path": "extensions/claude-code/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
         }
       ]
     }

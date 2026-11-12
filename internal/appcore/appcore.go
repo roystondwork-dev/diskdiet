@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -31,6 +32,8 @@ type Deps struct {
 	Now     func() time.Time
 	// Reveal shows a path in the file manager.
 	Reveal func(path string) error
+	// Demo means the sources are made up (DISKDIET_DEMO=1).
+	Demo bool
 	// CleanLock, when set, is held while cleaning, so cores that share it
 	// (the window and the background watcher) never clean at the same time.
 	CleanLock *sync.Mutex
@@ -44,11 +47,15 @@ func SystemDeps() Deps {
 			if err != nil {
 				return nil, "", err
 			}
+			if source.DemoEnabled(env.Getenv) {
+				return source.Demo(env.Home), env.Home, nil
+			}
 			return source.All(env), env.Home, nil
 		},
 		Busy:   procs.Busy,
 		Now:    time.Now,
 		Reveal: reveal,
+		Demo:   source.DemoEnabled(os.Getenv),
 	}
 }
 
@@ -125,6 +132,8 @@ type Summary struct {
 	OlderThanDays int          `json:"olderThanDays"`
 	Volumes       bool         `json:"volumes"`
 	ScannedAt     time.Time    `json:"scannedAt"`
+	// Demo means the data is made up and cleaning removes nothing.
+	Demo bool `json:"demo"`
 }
 
 // Progress reports one source starting or finishing.
@@ -191,7 +200,7 @@ func (c *Core) Scan(ctx context.Context, req ScanRequest, progress func(Progress
 		return nil, fmt.Errorf("scan stopped: %w", err)
 	}
 
-	sum := &Summary{OlderThanDays: req.OlderThanDays, Volumes: req.Volumes, ScannedAt: now, Missing: []string{}, Sources: []SourceView{}}
+	sum := &Summary{OlderThanDays: req.OlderThanDays, Volumes: req.Volumes, ScannedAt: now, Missing: []string{}, Sources: []SourceView{}, Demo: c.d.Demo}
 	paths := map[string]bool{}
 	for _, r := range reports {
 		if !r.Found {

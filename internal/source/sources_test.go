@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -467,4 +468,39 @@ func TestKeepProjects(t *testing.T) {
 		t.Fatalf("result = %+v", res)
 	}
 	KeepProjects(&Report{}, []string{"x"}) // reports without a node_modules plan are ignored
+}
+
+func TestProjectSourcesShareOneWalk(t *testing.T) {
+	home := t.TempDir()
+	writeFile(t, filepath.Join(home, "web", "node_modules", "x.js"), "x")
+	writeFile(t, filepath.Join(home, "rs", "Cargo.toml"), "[package]")
+	writeFile(t, filepath.Join(home, "rs", "target", "app"), "x")
+	env := testEnv(home, "linux", nil, nil)
+	f := newProjectFinder(env)
+	nm, tg := newNodeModules(env, f), newTargets(env, f)
+	var wg sync.WaitGroup
+	var rn, rt *Report
+	wg.Go(func() { rn = nm.Scan(context.Background(), month) })
+	wg.Go(func() { rt = tg.Scan(context.Background(), month) })
+	wg.Wait()
+	if rn.Items != 1 || rt.Items != 1 || f.walks != 1 {
+		t.Fatalf("node_modules %d, target %d, walks %d", rn.Items, rt.Items, f.walks)
+	}
+	// A new scan walks again.
+	later := month
+	later.Now = later.Now.Add(time.Minute)
+	nm.Scan(context.Background(), later)
+	if f.walks != 2 {
+		t.Fatalf("walks = %d", f.walks)
+	}
+	// All shares one finder between the two.
+	var got []*projectFinder
+	for _, s := range All(env) {
+		if ps, ok := s.(*projectSource); ok {
+			got = append(got, ps.finder)
+		}
+	}
+	if len(got) != 2 || got[0] != got[1] {
+		t.Fatal("All should share the finder")
+	}
 }

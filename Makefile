@@ -71,3 +71,7 @@ app-dev: ## Run the desktop app with live reload.
 .PHONY: app-package
 app-package: ## Package the desktop app for this OS (dmg, installer or AppImage).
 	cd app && wails3 task package
+
+.PHONY: demo
+demo: build ## Record docs/assets/demo.gif with made-up data (needs vhs).
+	vhs docs/assets/demo.tape
