@@ -87,3 +87,17 @@ app-package: ## Package the desktop app for this OS (dmg, installer or AppImage)
 .PHONY: demo
 demo: build ## Record docs/assets/demo.gif with made-up data (needs vhs).
 	vhs docs/assets/demo.tape
+
+##@ Documentation site (MkDocs Material; pip install --require-hashes -r docs/requirements.txt)
+
+.PHONY: docs-cli
+docs-cli: ## Regenerate the CLI reference in docs/commands.
+	go run ./internal/cli/gendocs -out docs/commands
+
+.PHONY: docs
+docs: docs-cli ## Build the site into ./site (strict).
+	mkdocs build --strict
+
+.PHONY: docs-serve
+docs-serve: docs-cli ## Preview the site at http://127.0.0.1:8000.
+	mkdocs serve

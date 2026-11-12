@@ -33,6 +33,11 @@ jobs:
         run: go tool -modfile=tools/go.mod govulncheck ./...
       - name: actionlint
         run: go tool -modfile=tools/go.mod actionlint
+      - name: CLI reference is up to date
+        run: |
+          go run ./internal/cli/gendocs -out docs/commands
+          git diff --exit-code -- docs/commands || {
+            echo "::error::docs/commands is stale; run 'make docs-cli' and commit the result"; exit 1; }
 
   test:
     name: Test (${{ matrix.os }})

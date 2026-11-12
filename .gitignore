@@ -10,6 +10,9 @@
 coverage*.txt
 coverage.html
 
+# Docs build
+/site/
+
 # Editors / OS
 .idea/
 .vscode/

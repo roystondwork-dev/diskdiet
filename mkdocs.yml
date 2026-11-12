@@ -1,0 +1,112 @@
+site_name: diskdiet
+site_description: See where your developer disk space went (npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Docker, Xcode, node_modules) and get it back safely.
+site_url: https://roystondwork-dev.github.io/diskdiet/
+repo_url: https://github.com/roystondwork-dev/diskdiet
+repo_name: roystondwork-dev/diskdiet
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Royston D and diskdiet contributors — MIT License
+
+strict: true
+exclude_docs: |
+  requirements.in
+  requirements.txt
+  *.tape
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  icon:
+    logo: material/harddisk
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle: { icon: material/weather-night, name: Switch to dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle: { icon: material/weather-sunny, name: Switch to light mode }
+  features:
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/roystondwork-dev/diskdiet
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/diskdiet
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/diskdiet/
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Install: install.md
+      - Quickstart: quickstart.md
+  - Free disk space:
+      - "Disk full? (no space left on device)": fix/index.md
+      - npm cache is huge: fix/npm-cache.md
+      - Old node_modules folders: fix/node-modules.md
+      - Docker uses too much disk: fix/docker.md
+      - pip and uv caches: fix/python.md
+      - Xcode DerivedData and simulators: fix/xcode.md
+      - Cargo, Go, Gradle, Maven: fix/others.md
+      - Playwright and Cypress downloads: fix/browsers.md
+  - Guides:
+      - Scan and clean (CLI): guide/cli.md
+      - What diskdiet cleans: guide/sources.md
+      - Desktop app and tray: app.md
+      - VS Code extension: vscode.md
+      - AI assistants (MCP): mcp.md
+      - Docker details: docker.md
+      - Scripting and CI: guide/scripting.md
+  - Reference:
+      - Commands:
+          - diskdiet: commands/diskdiet.md
+          - scan: commands/diskdiet_scan.md
+          - clean: commands/diskdiet_clean.md
+          - mcp: commands/diskdiet_mcp.md
+          - version: commands/diskdiet_version.md
+  - Trust:
+      - Security: security.md
+      - Verifying downloads: verifying.md
+      - Privacy: privacy.md

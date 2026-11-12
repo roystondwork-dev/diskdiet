@@ -245,3 +245,10 @@ func scanAll(ctx context.Context, d Deps, srcs []source.Source, o source.Options
 	wg.Wait()
 	return reports
 }
+
+// NewRootCmd returns the diskdiet command tree, for generating documentation.
+func NewRootCmd(d Deps) *cobra.Command {
+	root := newRoot(d)
+	root.InitDefaultCompletionCmd()
+	return root
+}

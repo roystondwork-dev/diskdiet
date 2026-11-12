@@ -10,3 +10,5 @@ exclude:
   paths:
     # main() only wires os.Exit around cli.Execute, which is tested directly.
     - ^cmd/diskdiet/main\.go$
+    # The docs generator is not shipped code.
+    - ^internal/cli/gendocs/
