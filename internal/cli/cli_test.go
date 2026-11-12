@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -409,5 +411,45 @@ func TestSystemDeps(t *testing.T) {
 	srcs, home, err := d.Sources()
 	if err != nil || len(srcs) != len(source.IDs()) || home == "" {
 		t.Errorf("Sources = %d, %q, %v", len(srcs), home, err)
+	}
+}
+
+func TestMCP(t *testing.T) {
+	inR, inW := io.Pipe()
+	outR, outW := io.Pipe()
+	srcs := fakes()
+	d := Deps{
+		Sources: func() ([]source.Source, string, error) {
+			list := make([]source.Source, len(srcs))
+			for i, s := range srcs {
+				list[i] = s
+			}
+			return list, "/home/me", nil
+		},
+		Busy: func(context.Context) (map[string]string, error) { return nil, nil },
+		Now:  time.Now,
+		In:   inR, Out: outW, Err: io.Discard,
+	}
+	done := make(chan int, 1)
+	go func() { done <- Execute(context.Background(), d, []string{"mcp"}) }()
+	lines := bufio.NewScanner(outR)
+	send := func(msg string) {
+		if _, err := io.WriteString(inW, msg+"\n"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	send(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}`)
+	if !lines.Scan() || !strings.Contains(lines.Text(), `"name":"diskdiet"`) {
+		t.Fatalf("initialize: %s", lines.Text())
+	}
+	send(`{"jsonrpc":"2.0","method":"notifications/initialized"}`)
+	send(`{"jsonrpc":"2.0","id":2,"method":"tools/list"}`)
+	if !lines.Scan() || !strings.Contains(lines.Text(), `"scan_disk_usage"`) || !strings.Contains(lines.Text(), `"free_disk_space"`) {
+		t.Fatalf("tools/list: %s", lines.Text())
+	}
+	_ = inW.Close()
+	go func() { _, _ = io.Copy(io.Discard, outR) }()
+	if code := <-done; code != ExitOK {
+		t.Fatalf("exit %d", code)
 	}
 }
