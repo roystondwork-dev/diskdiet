@@ -54,13 +54,17 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: app/frontend/package-lock.json
+      - name: Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
       - name: Install Wails
-        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
+        run: go install -tags gtk3 "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
       - name: Type-check the frontend
         working-directory: app
         run: |
           (cd frontend && npm ci)
-          wails3 generate bindings -clean=true -ts -i
+          wails3 generate bindings -f '-tags gtk3' -clean=true -ts -i
           (cd frontend && npm run check)
 
   build:
@@ -102,10 +106,13 @@ jobs:
       - name: NSIS (Windows installer)
         if: runner.os == 'Windows'
         shell: bash
-        run: command -v makensis || choco install nsis -y --no-progress
+        run: |
+          command -v makensis || choco install nsis -y --no-progress
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
       - name: Install Wails
         shell: bash
-        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
+        # On Linux, build against GTK 3 and WebKit2GTK 4.1 (see the Package step).
+        run: go install ${{ runner.os == 'Linux' && '-tags gtk3' || '' }} "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
       - name: Version
         id: version
         shell: bash
@@ -130,7 +137,9 @@ jobs:
               wails3 task windows:package VERSION="$VERSION" INSTALL_SCOPE=user
               src=$(ls build/windows/nsis/*installer.exe) ;;
             Linux)
-              wails3 task linux:create:appimage VERSION="$VERSION"
+              # GTK 3 + WebKit2GTK 4.1 rather than Wails' GTK 4 default: they are on
+              # far more distributions, including Ubuntu 22.04.
+              wails3 task linux:create:appimage VERSION="$VERSION" EXTRA_TAGS=gtk3
               src=$(ls bin/*.AppImage) ;;
           esac
           mkdir -p ../dist-app

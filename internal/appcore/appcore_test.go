@@ -36,7 +36,13 @@ func (f *fakeSource) Clean(context.Context, *source.Report, source.Options) *sou
 }
 
 var (
-	home = filepath.Join(string(filepath.Separator)+"home", "me")
+	home = func() string {
+		abs, err := filepath.Abs(filepath.Join(string(filepath.Separator)+"home", "me"))
+		if err != nil {
+			panic(err)
+		}
+		return abs // has a drive letter on Windows
+	}()
 	now  = time.Date(2026, 11, 12, 10, 0, 0, 0, time.UTC)
 )
 
