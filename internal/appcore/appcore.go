@@ -31,6 +31,9 @@ type Deps struct {
 	Now     func() time.Time
 	// Reveal shows a path in the file manager.
 	Reveal func(path string) error
+	// CleanLock, when set, is held while cleaning, so cores that share it
+	// (the window and the background watcher) never clean at the same time.
+	CleanLock *sync.Mutex
 }
 
 // SystemDeps uses the real machine.
@@ -279,6 +282,10 @@ func (c *Core) Clean(ctx context.Context, req CleanRequest, progress func(Progre
 	c.mu.Unlock()
 	if reports == nil || c.d.Now().Sub(scanned) > MaxScanAge {
 		return nil, ErrNoScan
+	}
+	if c.d.CleanLock != nil {
+		c.d.CleanLock.Lock()
+		defer c.d.CleanLock.Unlock()
 	}
 	busy := map[string]string{}
 	if !req.Force {

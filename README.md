@@ -43,6 +43,11 @@ can be freed, a bar for every cache, and the `node_modules` of each project you
 haven't touched, which you can untick to keep. Pick an age (7, 30 or 90 days, or
 everything), review the list, and free it in one click.
 
+It also stays in your menu bar (or system tray) after you close the window, checks
+every few hours, and notifies you when more than 10 GB could be freed. If you want, it
+can clean old package-cache entries automatically every day or week, but never
+`node_modules` or Docker ([details](docs/app.md#the-menu-bar--tray-icon)).
+
 Download it from the [latest release](https://github.com/roystondwork-dev/diskdiet/releases/latest):
 
 | OS | File |
@@ -141,7 +146,7 @@ is signed with cosign (keyless) and releases include SBOMs and build provenance.
 ## Roadmap
 
 - ~~**v0.2**: a desktop app for macOS, Windows and Linux~~
-- **v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning
+- ~~**v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning~~
 - **Later**: pip/uv, Cargo, Gradle/Maven, Go, Playwright/Cypress browsers, Xcode
 
 Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-dev/diskdiet/issues).
