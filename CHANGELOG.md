@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.3.0...v0.4.0) (2026-11-12)
+
+
+### Features
+
+* pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode and target folders ([#8](https://github.com/roystondwork-dev/diskdiet/issues/8)) ([30d3608](https://github.com/roystondwork-dev/diskdiet/commit/30d36086e63da4a2b753fa1517baaf89635c7a72))
+
 ## [0.3.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.2.0...v0.3.0) (2026-11-12)
 
 
