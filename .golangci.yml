@@ -62,6 +62,9 @@ linters:
         - github.com/roystondwork-dev/diskdiet/*
   exclusions:
     generated: lax
+    paths:
+      - extensions # npm packages there can contain Go files
+      - app/frontend
     presets:
       - std-error-handling
     rules:

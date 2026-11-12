@@ -123,6 +123,21 @@
           "type": "json",
           "path": "extensions/claude-code/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "extensions/vscode/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "extensions/vscode/package-lock.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "extensions/vscode/package-lock.json",
+          "jsonpath": "$.packages[''].version"
         }
       ]
     }

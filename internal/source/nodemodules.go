@@ -229,7 +229,8 @@ func Projects(r *Report, now time.Time) []ProjectInfo {
 	out := make([]ProjectInfo, 0, len(plans))
 	for _, p := range plans {
 		for _, e := range p.entries {
-			out = append(out, ProjectInfo{Path: e.Path, Bytes: e.Usage.Exclusive, Idle: now.Sub(e.Modified)})
+			idle := now.Sub(e.Modified)
+			out = append(out, ProjectInfo{Path: e.Path, Bytes: e.Usage.Exclusive, Idle: idle, IdleDays: int(idle.Hours() / 24)})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Bytes > out[j].Bytes })
@@ -241,6 +242,8 @@ type ProjectInfo struct {
 	Path  string        `json:"path"`
 	Bytes int64         `json:"bytes"`
 	Idle  time.Duration `json:"idleNanoseconds"`
+	// IdleDays is Idle in whole days.
+	IdleDays int `json:"idleDays"`
 }
 
 // KeepProjects removes the given node_modules folders from r's plan, so a

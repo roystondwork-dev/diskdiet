@@ -453,3 +453,41 @@ func TestMCP(t *testing.T) {
 		t.Fatalf("exit %d", code)
 	}
 }
+
+func TestDemoJSONProjectsAndKeep(t *testing.T) {
+	home := t.TempDir() // absolute on every OS, as real paths are
+	demo := source.Demo(home)
+	d := func(out *bytes.Buffer) Deps {
+		return Deps{
+			Sources: func() ([]source.Source, string, error) { return demo, home, nil },
+			Busy:    func(context.Context) (map[string]string, error) { return nil, nil },
+			Now:     time.Now,
+			In:      strings.NewReader(""), Out: out, Err: io.Discard, Demo: true,
+		}
+	}
+	var out bytes.Buffer
+	if code := Execute(context.Background(), d(&out), []string{"scan", "--json", "--only", "node_modules"}); code != ExitOK {
+		t.Fatalf("scan exit %d", code)
+	}
+	var scan struct {
+		Sources []struct {
+			ID       string `json:"id"`
+			Projects []struct {
+				Path     string `json:"path"`
+				IdleDays int    `json:"idleDays"`
+			} `json:"projects"`
+		} `json:"sources"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &scan); err != nil || len(scan.Sources) != 1 || len(scan.Sources[0].Projects) != 5 || scan.Sources[0].Projects[0].IdleDays < 30 {
+		t.Fatalf("scan = %+v, %v", scan, err)
+	}
+	keep := scan.Sources[0].Projects[0].Path
+	out.Reset()
+	if code := Execute(context.Background(), d(&out), []string{"clean", "--json", "--dry-run", "--only", "node_modules", "--keep", keep}); code != ExitOK {
+		t.Fatalf("clean exit %d", code)
+	}
+	quoted, _ := json.Marshal(keep) // as it would appear in the JSON
+	if strings.Contains(out.String(), string(quoted)) || !strings.Contains(out.String(), `"prunableItems": 4`) {
+		t.Fatalf("kept folder still planned: %s", out.String())
+	}
+}
