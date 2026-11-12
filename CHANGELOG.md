@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.2.0...v0.3.0) (2026-11-12)
+
+
+### Features
+
+* **app:** menu bar / tray icon with background checks and notifications ([#5](https://github.com/roystondwork-dev/diskdiet/issues/5)) ([ed60571](https://github.com/roystondwork-dev/diskdiet/commit/ed60571cab3c72e3536b4428082a9f30d58f21d2))
+
 ## [0.2.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.1.0...v0.2.0) (2026-11-12)
 
 
