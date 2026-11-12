@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.0...v0.6.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* **app:** only package caches start ticked; README screenshot ([#17](https://github.com/roystondwork-dev/diskdiet/issues/17)) ([a656eab](https://github.com/roystondwork-dev/diskdiet/commit/a656eaba4130b2b3ce217ba07c3a8f658bf9faa0))
+
 ## [0.6.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.5.0...v0.6.0) (2026-11-12)
 
 
