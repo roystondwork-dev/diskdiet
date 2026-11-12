@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.2](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.1...v0.6.2) (2026-11-12)
+
+
+### Bug Fixes
+
+* **ci:** pin and verify the app's Linux and Windows build tools ([#20](https://github.com/roystondwork-dev/diskdiet/issues/20)) ([23e4698](https://github.com/roystondwork-dev/diskdiet/commit/23e46981bccafc01a856ee14e2f0f4169a09be90))
+
+
+### Documentation
+
+* public documentation site on GitHub Pages ([#21](https://github.com/roystondwork-dev/diskdiet/issues/21)) ([90a204e](https://github.com/roystondwork-dev/diskdiet/commit/90a204ea40519deecf1c709d6c05e0bdfc4e59eb))
+
 ## [0.6.1](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.0...v0.6.1) (2026-11-12)
 
 

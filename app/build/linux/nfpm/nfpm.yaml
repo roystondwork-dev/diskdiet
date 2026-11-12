@@ -6,7 +6,7 @@
 name: "diskdiet"
 arch: ${GOARCH}
 platform: "linux"
-version: "0.6.1" # x-release-please-version
+version: "0.6.2" # x-release-please-version
 section: "default"
 priority: "extra"
 maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
