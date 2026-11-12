@@ -47,7 +47,8 @@ each cache:
 
 - **Count as old** chooses what's removable: things unused for 7, 30 or 90 days, or
   everything.
-- **Tick or untick** a row to include it. For `node_modules`, open the list of
+- **Tick or untick** a row to include it. Package caches start ticked; Docker,
+  `node_modules` and `target` folders wait until you tick them. For `node_modules`, open the list of
   projects and untick any you want to keep.
 - **Docker** volumes are kept unless you tick *Also remove unused volumes*.
 - Click a folder name to show it in Finder, Explorer or your file manager.
