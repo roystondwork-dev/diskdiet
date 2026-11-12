@@ -36,6 +36,29 @@ Total 75.6 GB, of which about 54.2 GB can be freed (older than 30d).
 Run `diskdiet clean` to free it; you'll see the list and be asked first.
 ```
 
+## Desktop app
+
+Prefer clicking? The diskdiet app shows the same breakdown in a window: how much
+can be freed, a bar for every cache, and the `node_modules` of each project you
+haven't touched, which you can untick to keep. Pick an age (7, 30 or 90 days, or
+everything), review the list, and free it in one click.
+
+Download it from the [latest release](https://github.com/roystondwork-dev/diskdiet/releases/latest):
+
+| OS | File |
+|---|---|
+| macOS (Apple silicon and Intel) | `diskdiet-app_<version>_macos_universal.dmg` |
+| Windows | `diskdiet-app_<version>_windows_amd64_setup.exe` (installs for your user, no admin needed) |
+| Linux | `diskdiet-app_<version>_linux_x86_64.AppImage` |
+
+The app isn't signed by Apple or Microsoft yet, so the first launch needs one extra
+step ([details](docs/app.md)):
+
+- **macOS:** open the app once, then go to **System Settings → Privacy & Security** and
+  click **Open Anyway**.
+- **Windows:** on the SmartScreen warning, click **More info → Run anyway**.
+- **Linux:** `chmod +x diskdiet-app_*.AppImage` and run it.
+
 ## Usage
 
 ```sh
@@ -117,7 +140,7 @@ is signed with cosign (keyless) and releases include SBOMs and build provenance.
 
 ## Roadmap
 
-- **v0.2**: a desktop app for macOS, Windows and Linux (a breakdown you can click through)
+- ~~**v0.2**: a desktop app for macOS, Windows and Linux~~
 - **v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning
 - **Later**: pip/uv, Cargo, Gradle/Maven, Go, Playwright/Cypress browsers, Xcode
 

@@ -83,3 +83,15 @@ jobs:
             dist/*.rpm
             dist/*.apk
             dist/checksums.txt
+
+  app:
+    needs: [release-please, goreleaser]
+    if: >-
+      always() && needs.goreleaser.result == 'success'
+    uses: ./.github/workflows/app.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write

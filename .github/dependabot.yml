@@ -1,11 +1,20 @@
 version: 2
 updates:
   - package-ecosystem: gomod
-    directories: ["/", "/tools"]
+    directories: ["/", "/tools", "/app"]
     schedule:
       interval: weekly
     groups:
       go-deps:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(deps)"
+  - package-ecosystem: npm
+    directory: /app/frontend
+    schedule:
+      interval: weekly
+    groups:
+      app-npm-deps:
         patterns: ["*"]
     commit-message:
       prefix: "build(deps)"

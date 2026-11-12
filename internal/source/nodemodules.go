@@ -167,3 +167,33 @@ type ProjectInfo struct {
 	Bytes int64         `json:"bytes"`
 	Idle  time.Duration `json:"idleNanoseconds"`
 }
+
+// KeepProjects removes the given node_modules folders from r's plan, so a
+// clean leaves them alone, and updates r's prunable totals.
+func KeepProjects(r *Report, keep []string) {
+	plans, ok := r.plan.([]entryPlan)
+	if !ok || len(keep) == 0 {
+		return
+	}
+	skip := make(map[string]bool, len(keep))
+	for _, k := range keep {
+		skip[filepath.Clean(k)] = true
+	}
+	var out []entryPlan
+	r.PrunableBytes, r.PrunableItems = 0, 0
+	for _, p := range plans {
+		var entries []fsx.Entry
+		for _, e := range p.entries {
+			if skip[filepath.Clean(e.Path)] {
+				continue
+			}
+			entries = append(entries, e)
+			r.PrunableBytes += e.Usage.Exclusive
+			r.PrunableItems++
+		}
+		if len(entries) > 0 {
+			out = append(out, entryPlan{root: p.root, entries: entries})
+		}
+	}
+	r.plan = out
+}

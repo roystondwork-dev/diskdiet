@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=diskdiet
+Comment=See where your developer disk space went, and get it back safely
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/diskdiet %u
+Terminal=false
+Type=Application
+Icon=diskdiet
+Categories=Utility;
+StartupWMClass=diskdiet
+
+ 

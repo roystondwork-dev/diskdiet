@@ -51,7 +51,60 @@
     ".": {
       "package-name": "diskdiet",
       "changelog-path": "CHANGELOG.md",
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "app/build/config.yml"
+        },
+        {
+          "type": "generic",
+          "path": "app/build/darwin/Info.plist"
+        },
+        {
+          "type": "generic",
+          "path": "app/build/linux/nfpm/nfpm.yaml"
+        },
+        {
+          "type": "generic",
+          "path": "app/build/windows/nsis/wails_tools.nsh"
+        },
+        {
+          "type": "json",
+          "path": "app/build/windows/info.json",
+          "jsonpath": "$.fixed.file_version"
+        },
+        {
+          "type": "json",
+          "path": "app/build/windows/info.json",
+          "jsonpath": "$.fixed.product_version"
+        },
+        {
+          "type": "json",
+          "path": "app/build/windows/info.json",
+          "jsonpath": "$.info['0409'].FileVersion"
+        },
+        {
+          "type": "json",
+          "path": "app/build/windows/info.json",
+          "jsonpath": "$.info['0409'].ProductVersion"
+        },
+        {
+          "type": "json",
+          "path": "app/frontend/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "app/frontend/package-lock.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "app/frontend/package-lock.json",
+          "jsonpath": "$.packages[''].version"
+        }
+      ]
     }
   }
 }

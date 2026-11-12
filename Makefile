@@ -57,3 +57,17 @@ snapshot: ## Build release artifacts locally without publishing.
 
 .PHONY: check
 check: lint test vuln ## Everything CI checks.
+
+##@ Desktop app (needs Node.js and the wails3 CLI: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0)
+
+.PHONY: app
+app: ## Build the desktop app into app/bin.
+	cd app && wails3 build
+
+.PHONY: app-dev
+app-dev: ## Run the desktop app with live reload.
+	cd app && wails3 dev
+
+.PHONY: app-package
+app-package: ## Package the desktop app for this OS (dmg, installer or AppImage).
+	cd app && wails3 task package
