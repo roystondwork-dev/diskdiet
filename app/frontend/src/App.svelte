@@ -8,7 +8,7 @@
     SourceView,
     Summary,
   } from "../bindings/github.com/roystondwork-dev/diskdiet/internal/appcore/models";
-  import { formatBytes, isProjects, percent } from "./lib/format";
+  import { formatBytes, isProjects, percent, safeByDefault } from "./lib/format";
   import FreeBar from "./lib/FreeBar.svelte";
   import SourceRow from "./lib/SourceRow.svelte";
   import ConfirmDialog from "./lib/ConfirmDialog.svelte";
@@ -64,8 +64,13 @@
     activity = {};
     error = "";
     try {
+      const first = summary === null;
       summary = await Disk.Scan({ olderThanDays, volumes });
       keepProjects = new Set();
+      if (first) {
+        // Only package caches start ticked; the user's choices stick after that.
+        unselected = new Set((summary?.sources ?? []).filter((s) => !safeByDefault(s.id)).map((s) => s.id));
+      }
       phase = "ready";
     } catch (e) {
       error = String(e);

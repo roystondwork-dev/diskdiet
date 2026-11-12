@@ -28,6 +28,12 @@ export function percent(part: number, whole: number): string {
   return p > 0 && p < 1 ? "<1%" : `${Math.round(p)}%`;
 }
 
+// Sources ticked by default: removing their old entries costs at most a
+// re-download. Project folders and Docker wait until the user ticks them.
+export function safeByDefault(id: string): boolean {
+  return !isProjects(id) && id !== "docker";
+}
+
 // Sources whose removable items are project folders the user can untick.
 export function isProjects(id: string): boolean {
   return id === "node_modules" || id === "target";

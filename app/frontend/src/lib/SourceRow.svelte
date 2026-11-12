@@ -102,7 +102,7 @@
     </label>
   {/if}
 
-  {#each source.notes ?? [] as note}
+  {#each (source.notes ?? []).filter((n) => !n.includes("--volumes")) as note}
     <p class="note">{note}</p>
   {/each}
   {#if source.error}

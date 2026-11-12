@@ -36,6 +36,8 @@ every few hours, and notifies you when more than 10 GB could be freed. If you wa
 can clean old package-cache entries automatically every day or week, but never
 `node_modules` or Docker ([details](docs/app.md#the-menu-bar--tray-icon)).
 
+<p align="center"><img alt="The diskdiet app: 64.2 GB can be freed, with npm cache, Docker and node_modules rows (made-up demo data)" src="docs/assets/app.png" width="760"></p>
+
 Download it from the [latest release](https://github.com/roystondwork-dev/diskdiet/releases/latest):
 
 | OS | File |
