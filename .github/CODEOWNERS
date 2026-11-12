@@ -1,0 +1,10 @@
+# Default owners for everything in the repo.
+*                         @roystondwork-dev
+
+# Safety-critical: what gets deleted, and how.
+/internal/fsx/            @roystondwork-dev
+/internal/source/         @roystondwork-dev
+/internal/mcpserver/      @roystondwork-dev
+/internal/appcore/        @roystondwork-dev
+/.github/workflows/       @roystondwork-dev
+/packaging/               @roystondwork-dev

@@ -12,6 +12,8 @@ make build     # ./bin/diskdiet
 make test      # tests with the race detector
 make lint      # golangci-lint and actionlint
 make cover     # tests with the coverage gate
+make fuzz      # every fuzz target (FUZZTIME=30s each); CI runs them for 20 s
+make mutation  # mutation testing of the safety-critical packages (slow; weekly in CI)
 ```
 
 Optional: `lefthook install` sets up git hooks that format code, check commit

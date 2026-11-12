@@ -1,0 +1,55 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please search existing issues first.
+        **Security issues** (for example diskdiet removing something it shouldn't): do not file here — see SECURITY.md.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did it happen?
+      options: [CLI, Desktop app, Tray / menu bar, VS Code extension, MCP server / AI assistant, npm or PyPI package]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you run, what did you expect, and what happened instead?
+      placeholder: |
+        Ran `diskdiet clean --only npm` and ...
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: Output of `diskdiet version --json`
+      render: json
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Linux, Windows, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: scan
+    attributes:
+      label: Output of `diskdiet scan` (or `diskdiet clean --dry-run`)
+      description: Paths in your home folder show as `~`; remove anything you'd rather not share.
+      render: shell

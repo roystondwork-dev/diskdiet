@@ -55,6 +55,18 @@ tidy: ## Tidy go.mod files.
 snapshot: ## Build release artifacts locally without publishing.
 	goreleaser release --snapshot --clean --skip=sign,sbom
 
+FUZZTIME ?= 30s
+
+.PHONY: fuzz
+fuzz: ## Run every fuzz target for FUZZTIME each.
+	scripts/fuzz.sh $(FUZZTIME)
+
+.PHONY: mutation
+mutation: ## Mutation-test the safety-critical packages (slow).
+	$(TOOL) gremlins unleash --workers 4 ./internal/fsx
+	$(TOOL) gremlins unleash --workers 4 ./internal/source
+	$(TOOL) gremlins unleash --workers 4 ./internal/units
+
 .PHONY: check
 check: lint test vuln ## Everything CI checks.
 

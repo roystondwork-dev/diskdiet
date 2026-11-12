@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an idea or improvement, such as a cache diskdiet should know
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the use case, not just the solution. For a new cache, say which tool, where it keeps its files, and how big it gets.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Example commands/flags/output are very helpful. For a new cache, how can old entries be told apart safely?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: contrib
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to open a pull request for this
