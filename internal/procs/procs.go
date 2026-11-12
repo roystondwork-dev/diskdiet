@@ -31,7 +31,7 @@ var List = func(ctx context.Context) ([]Proc, error) {
 			continue
 		}
 		base := normalize(name)
-		if base != "node" && managerOf(base) == "" {
+		if base != "node" && base != "java" && managerOf(base) == "" {
 			continue
 		}
 		args, _ := p.CmdlineSliceWithContext(ctx)
@@ -56,6 +56,10 @@ func managerOf(base string) string {
 		return "yarn"
 	case "bun", "bunx":
 		return "bun"
+	case "cargo":
+		return "cargo"
+	case "go":
+		return "go"
 	}
 	if strings.HasPrefix(base, "yarn-") && strings.HasSuffix(base, ".cjs") {
 		return "yarn"
@@ -70,6 +74,38 @@ var installVerbs = map[string]bool{
 	"upgrade": true, "remove": true, "rm": true, "uninstall": true, "dedupe": true,
 	"exec": true, "x": true, "dlx": true, "create": true, "init": true, "fetch": true,
 	"rebuild": true, "cache": true, "store": true, "pack": true, "publish": true,
+}
+
+// cargoVerbs and goVerbs are subcommands that read or fill those caches.
+var (
+	cargoVerbs = map[string]bool{
+		"build": true, "b": true, "check": true, "c": true, "test": true, "t": true, "run": true, "r": true,
+		"bench": true, "doc": true, "clippy": true, "fetch": true, "install": true, "update": true,
+		"add": true, "vendor": true, "package": true, "publish": true, "generate-lockfile": true,
+	}
+	goVerbs = map[string]bool{
+		"build": true, "test": true, "run": true, "get": true, "install": true, "mod": true,
+		"generate": true, "vet": true, "list": true, "work": true, "tool": true,
+	}
+)
+
+func verbsFor(id string) map[string]bool {
+	switch id {
+	case "cargo":
+		return cargoVerbs
+	case "go":
+		return goVerbs
+	default:
+		return installVerbs
+	}
+}
+
+// javaTools maps the main classes of Gradle and Maven to their sources. Only
+// builds count: an idle Gradle daemon doesn't block cleaning.
+var javaTools = map[string][2]string{
+	"org.gradle.wrapper.GradleWrapperMain":              {"gradle", "gradle"},
+	"org.gradle.launcher.GradleMain":                    {"gradle", "gradle"},
+	"org.codehaus.plexus.classworlds.launcher.Launcher": {"maven", "mvn"},
 }
 
 // Busy returns, for each source ID whose package manager is installing, a
@@ -111,6 +147,14 @@ func classify(p Proc) (id, what string) {
 			}
 		}
 	}
+	if normalize(p.Name) == "java" || normalize(args[0]) == "java" {
+		for _, a := range args[1:] {
+			if t, ok := javaTools[a]; ok {
+				return t[0], t[1]
+			}
+		}
+		return "", ""
+	}
 	if id == "" {
 		return "", ""
 	}
@@ -128,7 +172,7 @@ func classify(p Proc) (id, what string) {
 		if strings.HasPrefix(a, "-") {
 			continue
 		}
-		if installVerbs[a] {
+		if verbsFor(id)[a] {
 			return id, desc
 		}
 		break // the first plain word is the subcommand

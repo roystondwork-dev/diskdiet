@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -237,5 +238,35 @@ func TestExistsIsDir(t *testing.T) {
 	write(t, f, 1)
 	if !Exists(f) || IsDir(f) || !IsDir(dir) || Exists(filepath.Join(dir, "x")) {
 		t.Error("Exists/IsDir wrong")
+	}
+}
+
+func TestFind(t *testing.T) {
+	root := t.TempDir()
+	for _, p := range []string{"a/x@v1/f", "a/x@v2/f", "b/c/y@v1/g", "plain/h"} {
+		full := filepath.Join(root, filepath.FromSlash(p))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte("data"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := Find(context.Background(), root, Options{}, func(_, name string) bool { return strings.Contains(name, "@") })
+	if err != nil || len(got) != 3 {
+		t.Fatalf("Find = %v, %v", got, err)
+	}
+	for _, e := range got {
+		if e.Usage.Files != 1 || e.Modified.IsZero() {
+			t.Errorf("entry = %+v", e)
+		}
+	}
+	if _, err := Find(context.Background(), filepath.Join(root, "missing"), Options{}, func(string, string) bool { return true }); err == nil {
+		t.Error("missing root: no error")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := Find(ctx, root, Options{}, func(string, string) bool { return false }); err == nil {
+		t.Error("cancelled: no error")
 	}
 }

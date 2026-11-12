@@ -246,3 +246,41 @@ func IsDir(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.IsDir()
 }
+
+// Find walks root and measures each folder that accept chooses as one Entry,
+// without descending into it. It never follows symlinks. The entry's age is
+// the folder's own modification time.
+func Find(ctx context.Context, root string, opts Options, accept func(path, name string) bool) ([]Entry, error) {
+	var out []Entry
+	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		if err != nil {
+			if p == root {
+				return err
+			}
+			if d != nil && d.IsDir() {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if p == root || !d.IsDir() {
+			return nil
+		}
+		if !accept(p, d.Name()) {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return fs.SkipDir
+		}
+		u, _ := DirSize(ctx, p, opts)
+		out = append(out, Entry{Path: p, Usage: u, Modified: info.ModTime()})
+		return fs.SkipDir
+	})
+	if err != nil {
+		return out, fmt.Errorf("searching %s: %w", root, err)
+	}
+	return out, nil
+}

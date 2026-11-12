@@ -28,6 +28,11 @@ export function percent(part: number, whole: number): string {
   return p > 0 && p < 1 ? "<1%" : `${Math.round(p)}%`;
 }
 
+// Sources whose removable items are project folders the user can untick.
+export function isProjects(id: string): boolean {
+  return id === "node_modules" || id === "target";
+}
+
 // What a clean removes from each source, in plain words.
 export function describe(id: string, volumes: boolean): string {
   switch (id) {
@@ -42,8 +47,28 @@ export function describe(id: string, volumes: boolean): string {
       return volumes
         ? "Unused images, stopped containers, build cache and unused volumes"
         : "Unused images, stopped containers and build cache";
+    case "pip":
+      return "Cached downloads and built wheels";
+    case "uv":
+      return "The whole uv cache (uv cache clean)";
+    case "cargo":
+      return "Downloaded crates, unpacked sources and git checkouts";
+    case "go":
+      return "Build cache entries and module versions";
+    case "gradle":
+      return "Downloaded Gradle versions and per-version caches";
+    case "maven":
+      return "Artifact versions in ~/.m2";
+    case "playwright":
+      return "Older browser versions; the newest of each stays";
+    case "cypress":
+      return "Older Cypress versions; the newest stays";
+    case "xcode":
+      return "DerivedData and device support files (never Archives)";
     case "node_modules":
       return "node_modules of projects you haven't touched";
+    case "target":
+      return "target folders of Rust and Maven projects you haven't touched";
     default:
       return "";
   }

@@ -13,15 +13,39 @@ import (
 	"github.com/roystondwork-dev/diskdiet/internal/units"
 )
 
-// nodeModulesSource is the node_modules folders of projects. A project counts
-// as old when nothing at its top level has changed for the given age.
-type nodeModulesSource struct{ env Env }
+// projectSource is a folder that projects' tools rebuild: node_modules, or the
+// target folder of Rust and Maven projects. A project counts as old when
+// nothing at its top level has changed for the given age.
+type projectSource struct {
+	env    Env
+	id     string
+	name   string
+	folder string
+	// marker, when set, must accept the project folder, so that only real
+	// build output is found (a "target" folder could be anything).
+	marker func(project string) bool
+}
 
 // NewNodeModules finds projects' node_modules folders.
-func NewNodeModules(env Env) Source { return &nodeModulesSource{env: env} }
+func NewNodeModules(env Env) Source {
+	return &projectSource{env: env, id: "node_modules", name: "node_modules", folder: "node_modules"}
+}
 
-func (s *nodeModulesSource) ID() string   { return "node_modules" }
-func (s *nodeModulesSource) Name() string { return "node_modules" }
+// NewTargets finds the target folders of Rust (Cargo.toml) and Maven (pom.xml)
+// projects; cargo build and mvn package recreate them.
+func NewTargets(env Env) Source {
+	return &projectSource{env: env, id: "target", name: "target folders", folder: "target",
+		marker: func(project string) bool {
+			return fsx.Exists(filepath.Join(project, "Cargo.toml")) || fsx.Exists(filepath.Join(project, "pom.xml"))
+		}}
+}
+
+// IsProjects reports whether a source's plan is a list of project folders
+// (see Projects and KeepProjects).
+func IsProjects(id string) bool { return id == "node_modules" || id == "target" }
+
+func (s *projectSource) ID() string   { return s.id }
+func (s *projectSource) Name() string { return s.name }
 
 // skipUnderHome are folders in the home folder that hold no projects but many
 // files (or that macOS guards with permission prompts).
@@ -32,7 +56,7 @@ var skipUnderHome = map[string][]string{
 
 // find walks roots for node_modules folders. It never descends into hidden
 // folders or into a node_modules it found.
-func (s *nodeModulesSource) find(ctx context.Context, roots []string) []string {
+func (s *projectSource) find(ctx context.Context, roots []string) []string {
 	skip := map[string]bool{}
 	for _, name := range skipUnderHome[s.env.GOOS] {
 		skip[filepath.Join(s.env.Home, name)] = true
@@ -53,9 +77,12 @@ func (s *nodeModulesSource) find(ctx context.Context, roots []string) []string {
 				return nil
 			}
 			name := d.Name()
-			if name == "node_modules" {
+			if name == s.folder && (s.marker == nil || s.marker(filepath.Dir(p))) {
 				found = append(found, p)
 				return fs.SkipDir
+			}
+			if name == "node_modules" {
+				return fs.SkipDir // never look for projects inside dependencies
 			}
 			if hidden(name) || skip[p] {
 				return fs.SkipDir
@@ -68,8 +95,8 @@ func (s *nodeModulesSource) find(ctx context.Context, roots []string) []string {
 }
 
 // lastTouched is when the project last changed: the newest modification time
-// of the project folder and its top-level entries, ignoring node_modules.
-func lastTouched(project string) time.Time {
+// of the project folder and its top-level entries, ignoring the build folder.
+func lastTouched(project, folder string) time.Time {
 	var newest time.Time
 	if info, err := os.Lstat(project); err == nil {
 		newest = info.ModTime()
@@ -79,7 +106,7 @@ func lastTouched(project string) time.Time {
 		return newest
 	}
 	for _, de := range des {
-		if de.Name() == "node_modules" {
+		if de.Name() == folder {
 			continue
 		}
 		if info, err := de.Info(); err == nil && info.ModTime().After(newest) {
@@ -89,7 +116,7 @@ func lastTouched(project string) time.Time {
 	return newest
 }
 
-func (s *nodeModulesSource) Scan(ctx context.Context, o Options) *Report {
+func (s *projectSource) Scan(ctx context.Context, o Options) *Report {
 	r := &Report{ID: s.ID(), Name: s.Name()}
 	roots := o.Projects
 	if len(roots) == 0 {
@@ -115,7 +142,7 @@ func (s *nodeModulesSource) Scan(ctx context.Context, o Options) *Report {
 			defer wg.Done()
 			defer func() { <-sem }()
 			u, _ := fsx.DirSize(ctx, d, opts)
-			entries[i] = fsx.Entry{Path: d, Usage: u, Modified: lastTouched(filepath.Dir(d))}
+			entries[i] = fsx.Entry{Path: d, Usage: u, Modified: lastTouched(filepath.Dir(d), s.folder)}
 		}()
 	}
 	wg.Wait()
@@ -133,14 +160,14 @@ func (s *nodeModulesSource) Scan(ctx context.Context, o Options) *Report {
 			shared += e.Usage.Bytes - e.Usage.Exclusive
 		}
 	}
-	if shared > 0 {
+	if shared > 0 && s.id == "node_modules" {
 		r.note(units.FormatBytes(shared) + " of these folders is hard-linked from the pnpm store; pruning the pnpm store afterwards frees it")
 	}
 	r.plan = plan
 	return r
 }
 
-func (s *nodeModulesSource) Clean(ctx context.Context, r *Report, _ Options) *Result {
+func (s *projectSource) Clean(ctx context.Context, r *Report, _ Options) *Result {
 	res := &Result{ID: s.ID(), Name: s.Name()}
 	plans, _ := r.plan.([]entryPlan)
 	removeEntries(ctx, plans, res)

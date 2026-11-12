@@ -425,7 +425,7 @@ func TestNodeModulesSharedNote(t *testing.T) {
 }
 
 func TestLastTouched(t *testing.T) {
-	if !lastTouched(filepath.Join(t.TempDir(), "missing")).IsZero() {
+	if !lastTouched(filepath.Join(t.TempDir(), "missing"), "node_modules").IsZero() {
 		t.Error("missing project should have zero time")
 	}
 	p := t.TempDir()
@@ -434,7 +434,7 @@ func TestLastTouched(t *testing.T) {
 	age(t, filepath.Join(p, "src"), oldTime)
 	age(t, p, oldTime)
 	// node_modules is new but ignored.
-	if got := lastTouched(p); !got.Equal(oldTime) {
+	if got := lastTouched(p, "node_modules"); !got.Equal(oldTime) {
 		t.Errorf("lastTouched = %v, want %v", got, oldTime)
 	}
 }

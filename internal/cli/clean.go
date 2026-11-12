@@ -37,7 +37,14 @@ func newClean(d Deps) *cobra.Command {
   pnpm               packages no project uses (pnpm store prune), and old metadata
   Docker             unused images, stopped containers and build cache older than
                      --older-than; unused volumes only with --volumes
-  node_modules       in projects where nothing has changed for --older-than
+  pip, Cargo, Go     cached downloads and builds not changed in --older-than
+  Gradle, Maven      downloaded Gradle versions and caches; Maven artifacts
+  uv                 the whole cache (uv cache clean), only with --all
+  Playwright,        older browser and app versions; the newest always stays
+  Cypress
+  Xcode              DerivedData and device support files (never Archives)
+  node_modules,      in projects where nothing has changed for --older-than
+  target (Rust, Maven)
 
 Everything removed from a cache is downloaded again when a project needs it.
 It shows what it will remove and asks first, unless --yes is given.`,
@@ -210,11 +217,11 @@ func renderPlan(w io.Writer, reports []*source.Report, todo []int, o source.Opti
 	_ = tw.Flush()
 	for _, i := range todo {
 		r := reports[i]
-		if r.ID != "node_modules" {
+		if !source.IsProjects(r.ID) {
 			continue
 		}
 		ps := source.Projects(r, now)
-		fmt.Fprintln(w, "\n  node_modules folders, biggest first:")
+		fmt.Fprintf(w, "\n  %s, biggest first:\n", r.Name)
 		ptw := tabwriter.NewWriter(w, 0, 0, 3, ' ', 0)
 		for j, p := range ps {
 			if j == maxProjects {
@@ -242,7 +249,11 @@ func planDetail(r *source.Report, o source.Options) string {
 		return s
 	case "pnpm":
 		return "packages no project uses"
-	case "node_modules":
+	case "uv":
+		return "the whole cache (uv cache clean)"
+	case "playwright", "cypress":
+		return "older versions; the newest stays"
+	case "node_modules", "target":
 		return "projects you haven't touched"
 	default:
 		return fmt.Sprintf("%d cached items", r.PrunableItems)

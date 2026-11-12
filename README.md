@@ -2,7 +2,8 @@
 
 <p align="center">
   <b>See where your developer disk space went, and get it back safely.</b><br>
-  npm, Yarn, pnpm, Bun, Docker and forgotten node_modules. One binary for macOS, Linux and Windows.
+  npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Docker,<br>
+  and forgotten node_modules and target folders. One binary for macOS, Linux and Windows.
 </p>
 
 <p align="center">
@@ -81,7 +82,7 @@ diskdiet scan --json                      # for scripts
 |---|---|
 | `--older-than 30d` | What counts as old: `12h`, `7d`, `2w`… |
 | `--all` | Everything, whatever its age |
-| `--only`, `--skip` | `npm`, `yarn`, `pnpm`, `bun`, `docker`, `node_modules` |
+| `--only`, `--skip` | `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`, `maven`, `playwright`, `cypress`, `xcode`, `docker`, `node_modules`, `target` |
 | `--projects DIR` | Where to look for `node_modules` (repeatable; default: your home folder) |
 | `-n`, `--dry-run` | Show what `clean` would remove, remove nothing |
 | `-y`, `--yes` | Don't ask (for scripts and CI) |
@@ -97,8 +98,18 @@ diskdiet scan --json                      # for scripts
 | **Yarn** | Yarn 1 cache, Yarn 2+ global cache | Package folders and zips older than the cutoff |
 | **pnpm** | `pnpm store path` | Packages no project uses, via `pnpm store prune`; old metadata |
 | **Bun** | `~/.bun/install/cache` | Package folders older than the cutoff |
+| **pip** | `pip` cache (`PIP_CACHE_DIR`) | Cached downloads and built wheels older than the cutoff |
+| **uv** | `uv cache dir` | The whole cache via `uv cache clean`, only with `--all` (uv's entries depend on each other) |
+| **Cargo** | `~/.cargo` (`CARGO_HOME`) | Downloaded `.crate` files, unpacked sources and git checkouts older than the cutoff |
+| **Go** | `GOCACHE`, `GOMODCACHE` | Build cache entries not used for the cutoff (Go records their last use); module versions downloaded before it |
+| **Gradle** | `~/.gradle` (`GRADLE_USER_HOME`) | Downloaded Gradle distributions and per-version caches and logs older than the cutoff; Gradle manages its shared dependency cache itself |
+| **Maven** | `~/.m2/repository` | Artifact versions downloaded before the cutoff |
+| **Playwright** | `ms-playwright` cache | Older browser revisions; the newest of each browser always stays |
+| **Cypress** | Cypress cache | Older Cypress versions; the newest always stays |
+| **Xcode** (macOS) | `~/Library/Developer/Xcode` | DerivedData and iOS/watchOS/tvOS DeviceSupport older than the cutoff; never Archives |
 | **Docker** | your current docker context | Unused images, stopped containers and build cache older than the cutoff; volumes only with `--volumes` ([details](docs/docker.md)) |
 | **node_modules** | projects under your home folder | `node_modules` of projects where nothing has changed for the cutoff |
+| **target** | Rust (`Cargo.toml`) and Maven (`pom.xml`) projects under your home folder | Their `target` build folders, for projects where nothing has changed for the cutoff |
 
 Anything removed from a cache is downloaded again the next time a project needs it.
 A removed `node_modules` comes back with `npm install` (or `yarn`, `pnpm i`, `bun i`).
@@ -111,9 +122,10 @@ A removed `node_modules` comes back with `npm install` (or `yarn`, `pnpm i`, `bu
   it belongs to; symlinks are never followed.
 - **The tool's own command where there is one.** pnpm and Docker decide what is
   unused, so nothing a project or a running container needs goes away.
-- **Not under a running install.** If `npm install`, `pnpm add`, `yarn` or similar is
-  running, diskdiet skips that cache (`--force` overrides). A running `npm run dev`
-  doesn't count.
+- **Not under a running install or build.** If `npm install`, `pnpm add`, `yarn`,
+  `cargo build`, `go test`, a Gradle or Maven build or similar is running, diskdiet
+  skips that cache (`--force` overrides). A running `npm run dev` or an idle Gradle
+  daemon doesn't count.
 - **Volumes stay** unless you add `--volumes`.
 
 ## Install
@@ -147,7 +159,8 @@ is signed with cosign (keyless) and releases include SBOMs and build provenance.
 
 - ~~**v0.2**: a desktop app for macOS, Windows and Linux~~
 - ~~**v0.3**: a menu bar / tray icon that warns when caches grow, with optional scheduled pruning~~
-- **Later**: pip/uv, Cargo, Gradle/Maven, Go, Playwright/Cypress browsers, Xcode
+- ~~**v0.4**: pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, target folders~~
+- **Next**: an MCP server and a VS Code extension, like [portcheck](https://github.com/roystondwork-dev/portcheck)
 
 Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-dev/diskdiet/issues).
 

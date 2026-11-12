@@ -180,7 +180,8 @@ func newRoot(d Deps) *cobra.Command {
 		Use:   "diskdiet",
 		Short: "See where your developer disk space went, and get it back safely",
 		Long: `diskdiet measures the caches developer tools leave behind (npm, Yarn, pnpm,
-Bun, Docker) and the node_modules of projects you haven't touched, then frees
+Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Docker) and
+the node_modules and target folders of projects you haven't touched, then frees
 what is old: not used in 30 days by default.
 
 Run without a command, diskdiet scans and changes nothing.`,
