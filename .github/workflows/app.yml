@@ -1,0 +1,172 @@
+name: Desktop app
+
+# Builds the desktop app (app/) on macOS, Windows and Linux. On pull requests
+# and main it proves the app still builds and packages; when called by the
+# Release workflow with a tag, it uploads the packages to that release.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "internal/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/app.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "internal/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/app.yml"
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to upload the packages to, e.g. v0.2.0
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to (re)build and upload the app for; empty builds only
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  WAILS_VERSION: v3.1.0
+
+jobs:
+  check:
+    name: Frontend check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: app/go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/frontend/package-lock.json
+      - name: Install Wails
+        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
+      - name: Type-check the frontend
+        working-directory: app
+        run: |
+          (cd frontend && npm ci)
+          wails3 generate bindings -clean=true -ts -i
+          (cd frontend && npm run check)
+
+  build:
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            asset: macos_universal.dmg
+          - name: Windows
+            os: windows-latest
+            asset: windows_amd64_setup.exe
+          - name: Linux
+            # The oldest supported runner, so the AppImage runs on older distributions.
+            os: ubuntu-22.04
+            asset: linux_x86_64.AppImage
+    runs-on: ${{ matrix.os }}
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: app/go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/frontend/package-lock.json
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
+      - name: NSIS (Windows installer)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: command -v makensis || choco install nsis -y --no-progress
+      - name: Install Wails
+        shell: bash
+        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@${WAILS_VERSION}"
+      - name: Version
+        id: version
+        shell: bash
+        run: |
+          v="${TAG#v}"
+          echo "version=${v:-dev}" >> "$GITHUB_OUTPUT"
+      - name: Package
+        working-directory: app
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          # linuxdeploy is itself an AppImage; runners have no FUSE.
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: |
+          case "$RUNNER_OS" in
+            macOS)
+              wails3 task darwin:package:universal VERSION="$VERSION"
+              wails3 task darwin:create:dmg
+              src=bin/diskdiet.dmg ;;
+            Windows)
+              # Per-user install: no administrator prompt.
+              wails3 task windows:package VERSION="$VERSION" INSTALL_SCOPE=user
+              src=$(ls build/windows/nsis/*installer.exe) ;;
+            Linux)
+              wails3 task linux:create:appimage VERSION="$VERSION"
+              src=$(ls bin/*.AppImage) ;;
+          esac
+          mkdir -p ../dist-app
+          cp "$src" "../dist-app/diskdiet-app_${VERSION}_${{ matrix.asset }}"
+          ls -la ../dist-app
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: app-${{ matrix.name }}
+          path: dist-app/*
+          retention-days: 14
+          if-no-files-found: error
+
+  publish:
+    name: Upload to release
+    needs: [check, build]
+    if: inputs.tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # upload release assets
+      id-token: write      # build provenance
+      attestations: write
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: app-*
+          merge-multiple: true
+          path: dist-app
+      - name: Checksums
+        working-directory: dist-app
+        run: sha256sum diskdiet-app_* > diskdiet-app_checksums.txt && cat diskdiet-app_checksums.txt
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist-app/diskdiet-app_*
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" dist-app/* --clobber --repo "$GITHUB_REPOSITORY"

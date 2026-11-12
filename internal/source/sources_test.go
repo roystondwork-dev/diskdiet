@@ -438,3 +438,33 @@ func TestLastTouched(t *testing.T) {
 		t.Errorf("lastTouched = %v, want %v", got, oldTime)
 	}
 }
+
+func TestKeepProjects(t *testing.T) {
+	ctx := context.Background()
+	home := t.TempDir()
+	projs := make([]string, 0, 2)
+	for _, name := range []string{"a", "b"} {
+		p := filepath.Join(home, name)
+		writeFile(t, filepath.Join(p, "node_modules", "x.js"), strings.Repeat("x", 5000))
+		writeFile(t, filepath.Join(p, "package.json"), "{}")
+		age(t, filepath.Join(p, "package.json"), oldTime)
+		age(t, p, oldTime)
+		projs = append(projs, p)
+	}
+	s := NewNodeModules(testEnv(home, "linux", nil, nil))
+	rep := s.Scan(ctx, month)
+	if rep.PrunableItems != 2 {
+		t.Fatalf("report = %+v", rep)
+	}
+	before := rep.PrunableBytes
+	KeepProjects(rep, nil) // no-op
+	KeepProjects(rep, []string{filepath.Join(projs[0], "node_modules")})
+	if rep.PrunableItems != 1 || rep.PrunableBytes >= before {
+		t.Fatalf("after keep = %+v", rep)
+	}
+	res := s.Clean(ctx, rep, month)
+	if res.Removed != 1 || !exists(filepath.Join(projs[0], "node_modules")) || exists(filepath.Join(projs[1], "node_modules")) {
+		t.Fatalf("result = %+v", res)
+	}
+	KeepProjects(&Report{}, []string{"x"}) // reports without a node_modules plan are ignored
+}
