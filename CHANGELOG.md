@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.4.0...v0.5.0) (2026-11-12)
+
+
+### Features
+
+* **mcp:** diskdiet mcp, an MCP server for AI assistants ([#10](https://github.com/roystondwork-dev/diskdiet/issues/10)) ([5ae5be6](https://github.com/roystondwork-dev/diskdiet/commit/5ae5be6bfb5c3fa9697c33195565b32937a2fc12))
+
 ## [0.4.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.3.0...v0.4.0) (2026-11-12)
 
 
