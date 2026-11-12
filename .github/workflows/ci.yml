@@ -97,6 +97,18 @@ jobs:
       - name: Package
         run: npx vsce package --no-dependencies --out "$RUNNER_TEMP/diskdiet.vsix"
 
+  fuzz:
+    name: Fuzz (short)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      # The npm index parser, path containment and the parsers; see make fuzz.
+      - name: Every fuzz target for 20 s
+        run: scripts/fuzz.sh 20s
+
   coverage:
     name: Coverage gate
     needs: test
@@ -115,6 +127,11 @@ jobs:
         run: >
           go tool -modfile=tools/go.mod go-test-coverage --config=.testcoverage.yml
           --profile=coverage-Linux.out,coverage-macOS.out,coverage-Windows.out
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage-Linux.out,coverage-macOS.out,coverage-Windows.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   build:
     name: Release build smoke test

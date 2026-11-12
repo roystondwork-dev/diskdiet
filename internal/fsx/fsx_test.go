@@ -270,3 +270,22 @@ func TestFind(t *testing.T) {
 		t.Error("cancelled: no error")
 	}
 }
+
+// FuzzWithin: whatever Within accepts really is under root once cleaned, so
+// Remove can rely on it.
+func FuzzWithin(f *testing.F) {
+	for _, p := range []string{"a/b", "../x", "a/../../x", "/abs", "a/./b/..", "..", "...", "a/..b"} {
+		f.Add(p)
+	}
+	root := filepath.Join(f.TempDir(), "cache")
+	f.Fuzz(func(t *testing.T, rel string) {
+		p := filepath.Join(root, rel)
+		if !Within(root, p) {
+			return
+		}
+		clean := filepath.Clean(p)
+		if clean != root && !strings.HasPrefix(clean, root+string(filepath.Separator)) {
+			t.Fatalf("Within(%q, %q) accepted a path outside root (%q)", root, p, clean)
+		}
+	})
+}

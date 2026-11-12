@@ -8,6 +8,11 @@
 
 <p align="center">
   <a href="https://github.com/roystondwork-dev/diskdiet/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/roystondwork-dev/diskdiet/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/roystondwork-dev/diskdiet/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/roystondwork-dev/diskdiet/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://codecov.io/gh/roystondwork-dev/diskdiet"><img alt="Coverage" src="https://codecov.io/gh/roystondwork-dev/diskdiet/graph/badge.svg"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/diskdiet"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/diskdiet/badge"></a>
+  <a href="https://www.npmjs.com/package/diskdiet"><img alt="npm" src="https://img.shields.io/npm/v/diskdiet"></a>
+  <a href="https://pypi.org/project/diskdiet/"><img alt="PyPI" src="https://img.shields.io/pypi/v/diskdiet"></a>
   <a href="https://github.com/roystondwork-dev/diskdiet/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/roystondwork-dev/diskdiet"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
 </p>
@@ -174,7 +179,8 @@ winget install roystondwork-dev.diskdiet
 
 Archives, `.deb`, `.rpm` and `.apk` packages for amd64 and arm64 are on the
 [releases page](https://github.com/roystondwork-dev/diskdiet/releases). The checksum file
-is signed with cosign (keyless) and releases include SBOMs and build provenance.
+is signed with cosign (keyless) and releases include SBOMs and build provenance
+([how to verify](docs/verifying.md)).
 
 ## Demo mode
 
@@ -202,8 +208,10 @@ Ideas and bug reports are welcome in [issues](https://github.com/roystondwork-de
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md)
-and report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md) and
+[SUPPORT.md](SUPPORT.md). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) and
+report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+diskdiet collects no data ([privacy](docs/privacy.md)).
 
 ## License
 

@@ -1,0 +1,33 @@
+name: Mutation testing
+
+# Checks that the tests catch injected bugs in the engine (what gets deleted,
+# and how). Weekly and on demand: it takes too long for every pull request.
+on:
+  schedule:
+    - cron: "41 2 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gremlins:
+    name: gremlins (${{ matrix.package }})
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [fsx, source, units]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      # The tests touch the filesystem, so allow each mutant's run more time.
+      - name: Mutation test internal/${{ matrix.package }}
+        run: >
+          go tool -modfile=tools/go.mod gremlins unleash
+          --workers 2 --timeout-coefficient 10 --threshold-efficacy 75
+          ./internal/${{ matrix.package }}
