@@ -1,5 +1,5 @@
 name: diskdiet - free disk space
-description: Free disk space on CI runners by removing package caches (npm, pip, Go, Gradle, Docker…) and, optionally, unused preinstalled SDKs.
+description: "Free disk space on CI runners: clear package caches (npm, pip, Go, Docker…) and, optionally, unused preinstalled SDKs."
 author: Royston D
 branding:
   icon: hard-drive
