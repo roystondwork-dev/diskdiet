@@ -12,3 +12,5 @@ exclude:
     - ^cmd/diskdiet/main\.go$
     # The docs generator is not shipped code.
     - ^internal/cli/gendocs/
+    # Third-party npm packages can contain Go files (only present locally).
+    - node_modules/
