@@ -82,7 +82,7 @@ Your project's `node_modules` is never touched.
 [On the GitHub Marketplace](https://github.com/marketplace/actions/diskdiet-free-disk-space).
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
   with:
     remove-preinstalled: android,dotnet,haskell,codeql
 ```
