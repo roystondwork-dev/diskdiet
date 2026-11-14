@@ -4,6 +4,8 @@ description: Free disk space on GitHub Actions runners with the diskdiet action 
 
 # GitHub Action
 
+[:octicons-mark-github-16: diskdiet on the GitHub Marketplace](https://github.com/marketplace/actions/diskdiet-free-disk-space){ .md-button }
+
 Free disk space on a CI runner in one step:
 
 ```yaml
