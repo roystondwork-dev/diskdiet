@@ -1,0 +1,12 @@
+# OSV-Scanner settings, also read by OpenSSF Scorecard's Vulnerabilities check.
+# Each ignore records a reviewed decision and expires, so it is looked at again.
+
+[[IgnoredVulns]]
+# deepmerge prototype poisoning (low). Build-time only: it comes from
+# @sveltejs/vite-plugin-svelte (also in its latest 7.3.1) and only merges the
+# app's own Svelte config while building; nothing of it ships in the app.
+# No patched deepmerge exists (4.3.1 is the latest). Same decision as the
+# dismissed Dependabot alert #1.
+id = "GHSA-gcqx-w48m-w2h4"
+ignoreUntil = 2027-05-14
+reason = "Build-time only (Svelte's Vite plugin merging our own config); not shipped; no patched version exists."
