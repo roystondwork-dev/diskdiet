@@ -2,13 +2,15 @@
 
 <p align="center">
   <b>See where your developer disk space went, and get it back safely.</b><br>
-  npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Docker,<br>
+  npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Android SDK,<br>
+  Homebrew, CocoaPods, Docker,
   and forgotten node_modules and target folders. One binary for macOS, Linux and Windows.
 </p>
 
 <p align="center">
   <a href="https://github.com/roystondwork-dev/diskdiet/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/roystondwork-dev/diskdiet/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/roystondwork-dev/diskdiet/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/roystondwork-dev/diskdiet/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://github.com/marketplace/actions/diskdiet-free-disk-space"><img alt="GitHub Marketplace" src="https://img.shields.io/badge/Marketplace-diskdiet-blue?logo=github"></a>
   <a href="https://codecov.io/gh/roystondwork-dev/diskdiet"><img alt="Coverage" src="https://codecov.io/gh/roystondwork-dev/diskdiet/graph/badge.svg"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/diskdiet"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/roystondwork-dev/diskdiet/badge"></a>
   <a href="https://www.npmjs.com/package/diskdiet"><img alt="npm" src="https://img.shields.io/npm/v/diskdiet"></a>
@@ -77,6 +79,7 @@ fails with "no space left on device", it offers to free space right there
 Free disk space on CI runners in one step: package and Docker caches, and optionally
 the preinstalled SDKs your job doesn't use (20–30 GB on GitHub-hosted Linux runners).
 Your project's `node_modules` is never touched.
+[On the GitHub Marketplace](https://github.com/marketplace/actions/diskdiet-free-disk-space).
 
 ```yaml
 - uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
