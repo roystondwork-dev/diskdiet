@@ -51,6 +51,9 @@ each cache:
   `node_modules` and `target` folders wait until you tick them. For `node_modules`, open the list of
   projects and untick any you want to keep.
 - **Docker** volumes are kept unless you tick *Also remove unused volumes*.
+- **Move to the Trash instead of deleting** (on the `node_modules` and `target` rows) sends
+  project folders to the Trash, so you can put them back; their space is freed when you
+  empty the Trash. The choice is remembered.
 - Click a folder name to show it in Finder, Explorer or your file manager.
 
 **Free …** shows exactly what will be removed and asks before doing anything. The

@@ -81,6 +81,7 @@ type ScanOutput struct {
 type FreeInput struct {
 	Sources      []string `json:"sources" jsonschema:"the source ids to clean, from the last scan_disk_usage, e.g. [\"npm\", \"go\"]"`
 	KeepProjects []string `json:"keep_projects,omitempty" jsonschema:"node_modules or target folder paths from the scan to leave alone"`
+	Trash        bool     `json:"move_projects_to_trash,omitempty" jsonschema:"move node_modules and target folders to the Trash instead of deleting them, so they can be put back (space is freed once the Trash is emptied)"`
 }
 
 // ResultOut is what a clean did for one source.
@@ -96,11 +97,13 @@ type ResultOut struct {
 
 // FreeOutput is free_disk_space's result.
 type FreeOutput struct {
-	Summary    string      `json:"summary"`
-	Freed      string      `json:"freed"`
-	FreedBytes int64       `json:"freed_bytes"`
-	Declined   bool        `json:"declined,omitempty" jsonschema:"the user said no when asked; nothing was removed"`
-	Results    []ResultOut `json:"results"`
+	Summary      string      `json:"summary"`
+	Freed        string      `json:"freed"`
+	FreedBytes   int64       `json:"freed_bytes"`
+	Trashed      string      `json:"moved_to_trash,omitempty"`
+	TrashedBytes int64       `json:"moved_to_trash_bytes,omitempty"`
+	Declined     bool        `json:"declined,omitempty" jsonschema:"the user said no when asked; nothing was removed"`
+	Results      []ResultOut `json:"results"`
 }
 
 // server holds the scan between the two tools.
@@ -295,7 +298,7 @@ func (s *server) free(ctx context.Context, req *mcp.CallToolRequest, in FreeInpu
 		}
 	}
 
-	res, err := s.core.Clean(ctx, appcore.CleanRequest{IDs: in.Sources, KeepProjects: in.KeepProjects}, nil)
+	res, err := s.core.Clean(ctx, appcore.CleanRequest{IDs: in.Sources, KeepProjects: in.KeepProjects, Trash: in.Trash}, nil)
 	s.last = nil // a scan is good for one clean
 	if errors.Is(err, appcore.ErrNoScan) {
 		return nil, FreeOutput{}, errors.New("the scan is older than 15 minutes; call scan_disk_usage again and confirm with the user")
@@ -313,6 +316,10 @@ func (s *server) free(ctx context.Context, req *mcp.CallToolRequest, in FreeInpu
 		}
 	}
 	out.Summary = "Freed " + out.Freed + "."
+	if res.Trashed > 0 {
+		out.Trashed, out.TrashedBytes = units.FormatBytes(res.Trashed), res.Trashed
+		out.Summary += " Moved " + out.Trashed + " of project folders to the Trash; it's freed when the Trash is emptied."
+	}
 	if problems > 0 {
 		out.Summary += fmt.Sprintf(" %d source(s) were skipped or had items that couldn't be removed; see results.", problems)
 	}

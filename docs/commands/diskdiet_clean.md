@@ -47,6 +47,7 @@ diskdiet clean [flags]
       --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, docker, node_modules, target
       --projects stringArray   folder to search for node_modules (repeatable; default: your home folder)
       --skip strings           leave out these sources
+      --trash                  move node_modules and target folders to the Trash instead of deleting them (space is freed when the Trash is emptied)
       --volumes                also remove unused Docker volumes (they can hold databases)
   -y, --yes                    don't ask before removing
 ```

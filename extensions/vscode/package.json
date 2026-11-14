@@ -76,13 +76,13 @@
       },
       {
         "command": "diskdiet.free",
-        "title": "Free Disk Space…",
+        "title": "Free Disk Space\u2026",
         "category": "diskdiet",
         "icon": "$(trash)"
       },
       {
         "command": "diskdiet.freeSource",
-        "title": "Free…",
+        "title": "Free\u2026",
         "category": "diskdiet"
       },
       {
@@ -92,7 +92,7 @@
       },
       {
         "command": "diskdiet.setAge",
-        "title": "Set What Counts as Old…",
+        "title": "Set What Counts as Old\u2026",
         "category": "diskdiet",
         "icon": "$(history)"
       },
@@ -191,6 +191,11 @@
           "type": "string",
           "default": "",
           "description": "Path to the diskdiet binary. Empty uses the one bundled with the extension, else diskdiet on PATH."
+        },
+        "diskdiet.trashProjectFolders": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Move `node_modules` and `target` folders to the Trash (Recycle Bin) instead of deleting them, so you can put them back. Their space is freed when you empty the Trash. Caches are always deleted."
         }
       }
     }

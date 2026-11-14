@@ -25,6 +25,7 @@ type cleanCmd struct {
 	volumes bool
 	force   bool
 	keep    []string
+	trash   bool
 }
 
 func newClean(d Deps) *cobra.Command {
@@ -61,6 +62,7 @@ It shows what it will remove and asks first, unless --yes is given.`,
 	f.BoolVarP(&cc.dryRun, "dry-run", "n", false, "show what would be removed, and remove nothing")
 	f.BoolVar(&cc.volumes, "volumes", false, "also remove unused Docker volumes (they can hold databases)")
 	f.BoolVar(&cc.force, "force", false, "clean even while a package manager is installing")
+	f.BoolVar(&cc.trash, "trash", false, "move node_modules and target folders to the Trash instead of deleting them (space is freed when the Trash is emptied)")
 	f.StringArrayVar(&cc.keep, "keep", nil, "leave this node_modules or target folder alone (repeatable)")
 	return cmd
 }
@@ -72,6 +74,7 @@ type cleanJSON struct {
 	Plan          []sourceJSON     `json:"plan"`
 	Results       []*source.Result `json:"results"`
 	FreedBytes    int64            `json:"freedBytes"`
+	TrashedBytes  int64            `json:"trashedBytes,omitempty"`
 }
 
 func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
@@ -82,6 +85,7 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	o.Volumes = cc.volumes
+	o.Trash = cc.trash
 	if cc.json && !cc.yes && !cc.dryRun {
 		return &exitError{ExitUsage, errors.New("--json needs --yes or --dry-run, since diskdiet can't ask")}
 	}
@@ -151,7 +155,7 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 		}
 	}
 	var results []*source.Result
-	var freed int64
+	var freed, trashed int64
 	failed := false
 	for _, i := range todo {
 		s, r := srcs[i], reports[i]
@@ -169,6 +173,7 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 		}
 		results = append(results, res)
 		freed += res.Freed
+		trashed += res.Trashed
 		if len(res.Errors) > 0 {
 			failed = true
 		}
@@ -178,11 +183,11 @@ func (cc *cleanCmd) run(cmd *cobra.Command, _ []string) error {
 	}
 	if cc.json {
 		if err := writeJSON(out, cleanJSON{SchemaVersion: SchemaVersion, OlderThan: ageLabel(o),
-			Plan: withProjects(pick(reports, todo), now), Results: results, FreedBytes: freed}); err != nil {
+			Plan: withProjects(pick(reports, todo), now), Results: results, FreedBytes: freed, TrashedBytes: trashed}); err != nil {
 			return err
 		}
 	} else {
-		renderResults(out, results, freed)
+		renderResults(out, results, freed, trashed)
 	}
 	if failed {
 		return &exitError{code: ExitPartial, err: errors.New("some items could not be removed")}
@@ -271,6 +276,9 @@ func planDetail(r *source.Report, o source.Options) string {
 	case "playwright", "cypress":
 		return "older versions; the newest stays"
 	case "node_modules", "target":
+		if o.Trash {
+			return "projects you haven't touched, to the Trash"
+		}
 		return "projects you haven't touched"
 	default:
 		return fmt.Sprintf("%d cached items", r.PrunableItems)
@@ -293,19 +301,22 @@ func idle(d time.Duration) string {
 	}
 }
 
-func renderResults(w io.Writer, results []*source.Result, freed int64) {
+func renderResults(w io.Writer, results []*source.Result, freed, trashed int64) {
 	fmt.Fprintln(w)
 	tw := tabwriter.NewWriter(w, 0, 0, 3, ' ', 0)
 	fmt.Fprintln(tw, "WHAT\tFREED\tRESULT")
 	for _, r := range results {
 		status := "done"
+		if r.Trashed > 0 {
+			status = "moved to the Trash"
+		}
 		switch {
 		case r.Skipped != "":
 			status = "skipped: " + r.Skipped
 		case len(r.Errors) > 0:
 			status = fmt.Sprintf("%d could not be removed", len(r.Errors))
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\n", r.Name, units.FormatBytes(r.Freed), status)
+		fmt.Fprintf(tw, "%s\t%s\t%s\n", r.Name, units.FormatBytes(r.Freed+r.Trashed), status)
 	}
 	_ = tw.Flush()
 	for _, r := range results {
@@ -321,4 +332,7 @@ func renderResults(w io.Writer, results []*source.Result, freed int64) {
 		}
 	}
 	fmt.Fprintf(w, "\nFreed %s.\n", units.FormatBytes(freed))
+	if trashed > 0 {
+		fmt.Fprintf(w, "Moved %s to the Trash: empty it to free that space too, or put folders back from it.\n", units.FormatBytes(trashed))
+	}
 }

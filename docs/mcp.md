@@ -44,7 +44,7 @@ file (for Cursor, `~/.cursor/mcp.json`):
 | Tool | What it does |
 |---|---|
 | `scan_disk_usage` | Measures every cache diskdiet knows and what is removable: things unused for `older_than_days` (default 30). Optional: `sources` to limit it, `projects` folders to search for `node_modules` and `target`, `include_docker_volumes`. **Changes nothing.** |
-| `free_disk_space` | Removes what the last scan reported as removable, for the `sources` you choose. `keep_projects` leaves individual `node_modules` or `target` folders alone. |
+| `free_disk_space` | Removes what the last scan reported as removable, for the `sources` you choose. `keep_projects` leaves individual `node_modules` or `target` folders alone; `move_projects_to_trash` sends them to the Trash instead of deleting them. |
 
 ## Safety
 

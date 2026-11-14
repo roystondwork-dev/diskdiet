@@ -26,6 +26,13 @@
   let phase = $state<Phase>("scanning");
   let olderThanDays = $state(30);
   let volumes = $state(false);
+  // Move node_modules and target folders to the Trash instead of deleting them.
+  // Remembered between launches.
+  let trashProjects = $state(localStorage.getItem("diskdiet.trashProjects") === "1");
+  function setTrash(on: boolean) {
+    trashProjects = on;
+    localStorage.setItem("diskdiet.trashProjects", on ? "1" : "0");
+  }
   let summary = $state<Summary | null>(null);
   let result = $state<CleanSummary | null>(null);
   let error = $state("");
@@ -111,6 +118,7 @@
         ids: selected.map((s) => s.id),
         keepProjects: [...keepProjects],
         force: false,
+        trash: trashProjects,
       });
       phase = "done";
     } catch (e) {
@@ -202,6 +210,8 @@
               checked={!unselected.has(s.id)}
               {keepProjects}
               {volumes}
+              {trashProjects}
+              ontrash={setTrash}
               ontoggle={(on: boolean) => toggle(s.id, on)}
               onkeep={toggleProject}
               onvolumes={setVolumes}
@@ -238,6 +248,7 @@
       sources={selected}
       {freeFor}
       {volumes}
+      {trashProjects}
       {olderThanDays}
       total={selectedBytes}
       estimate={anyEstimate}

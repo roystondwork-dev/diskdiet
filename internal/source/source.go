@@ -85,6 +85,9 @@ type Options struct {
 	// Projects are the folders searched for node_modules. Empty means the
 	// home folder.
 	Projects []string
+	// Trash moves node_modules and target folders to the Trash instead of
+	// deleting them, so they can be put back. Caches are always deleted.
+	Trash bool
 }
 
 // Old reports whether something last changed at t is old enough to remove.
@@ -122,9 +125,11 @@ func (r *Report) note(s string) { r.Notes = append(r.Notes, s) }
 
 // Result is what a clean did for one source.
 type Result struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Freed   int64    `json:"freedBytes"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Freed int64  `json:"freedBytes"`
+	// Trashed is what was moved to the Trash: freed only once it's emptied.
+	Trashed int64    `json:"trashedBytes,omitempty"`
 	Removed int      `json:"removed"`
 	Skipped string   `json:"skipped,omitempty"`
 	Notes   []string `json:"notes,omitempty"`
