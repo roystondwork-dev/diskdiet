@@ -11,6 +11,8 @@
     ontoggle,
     onkeep,
     onvolumes,
+    trashProjects,
+    ontrash,
     onreveal,
   }: {
     source: SourceView;
@@ -21,6 +23,8 @@
     ontoggle: (on: boolean) => void;
     onkeep: (path: string, keep: boolean) => void;
     onvolumes: (on: boolean) => void;
+    trashProjects: boolean;
+    ontrash: (on: boolean) => void;
     onreveal: (path: string) => void;
   } = $props();
 
@@ -94,6 +98,13 @@
       <span class="muted">{source.items} folder{source.items === 1 ? "" : "s"} found</span>
     {/if}
   </div>
+
+  {#if isProjects(source.id) && cleanable}
+    <label class="option">
+      <input type="checkbox" checked={trashProjects} onchange={(e) => ontrash((e.currentTarget as HTMLInputElement).checked)} />
+      Move to the Trash instead of deleting <span class="muted">(you can put them back; the space is freed when you empty the Trash)</span>
+    </label>
+  {/if}
 
   {#if source.id === "docker" && !source.unavailable}
     <label class="option">

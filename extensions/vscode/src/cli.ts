@@ -105,13 +105,16 @@ export class DiskdietClient {
    * exactly what that scan plans, minus the folders in keep. Exit code 3 means
    * some items could not be removed; the result says which.
    */
-  clean(ids: readonly string[], olderThanDays: number, keep: readonly string[] = []): Promise<CleanData> {
+  clean(ids: readonly string[], olderThanDays: number, keep: readonly string[] = [], trash = false): Promise<CleanData> {
     if (ids.length === 0) {
       return Promise.reject(new DiskdietError("nothing chosen to clean"));
     }
     const args = ["clean", "--json", "--yes", "--only", ids.join(","), ...ageArgs(olderThanDays)];
     for (const k of keep) {
       args.push("--keep", k);
+    }
+    if (trash) {
+      args.push("--trash");
     }
     return this.json<CleanData>(args, CLEAN_TIMEOUT_MS, [0, 3]);
   }

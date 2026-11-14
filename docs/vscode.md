@@ -41,4 +41,5 @@ so it follows exactly the CLI's safety rules.
 | `diskdiet.warnAboveGB` | `10` | Notify once per session above this; `0` turns it off |
 | `diskdiet.checkEveryHours` | `6` | Background checks; `0` turns them off |
 | `diskdiet.detectDiskFull` | `true` | Offer to free space when a terminal command runs out of disk |
+| `diskdiet.trashProjectFolders` | `false` | Move `node_modules` and `target` folders to the Trash instead of deleting them |
 | `diskdiet.path` | | Use another diskdiet binary instead of the built-in one |

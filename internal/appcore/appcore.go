@@ -270,6 +270,9 @@ type CleanRequest struct {
 	KeepProjects []string `json:"keepProjects"`
 	// Force cleans even while a package manager is installing.
 	Force bool `json:"force"`
+	// Trash moves node_modules and target folders to the Trash instead of
+	// deleting them.
+	Trash bool `json:"trash"`
 }
 
 // ResultView is what a clean did for one source.
@@ -277,6 +280,7 @@ type ResultView struct {
 	ID      string   `json:"id"`
 	Name    string   `json:"name"`
 	Freed   int64    `json:"freed"`
+	Trashed int64    `json:"trashed"`
 	Removed int      `json:"removed"`
 	Skipped string   `json:"skipped"`
 	Notes   []string `json:"notes"`
@@ -287,6 +291,8 @@ type ResultView struct {
 type CleanSummary struct {
 	Results []ResultView `json:"results"`
 	Freed   int64        `json:"freed"`
+	// Trashed was moved to the Trash: freed once the Trash is emptied.
+	Trashed int64 `json:"trashed"`
 }
 
 // ErrNoScan is returned when Clean is called without a recent scan.
@@ -335,13 +341,16 @@ func (c *Core) Clean(ctx context.Context, req CleanRequest, progress func(Progre
 			continue
 		}
 		report(Progress{Phase: "clean", ID: s.ID(), Name: s.Name()})
-		res := s.Clean(ctx, r, o)
+		co := o
+		co.Trash = req.Trash
+		res := s.Clean(ctx, r, co)
 		report(Progress{Phase: "clean", ID: s.ID(), Name: s.Name(), Done: true})
 		sum.Results = append(sum.Results, ResultView{
-			ID: res.ID, Name: res.Name, Freed: res.Freed, Removed: res.Removed, Skipped: res.Skipped,
+			ID: res.ID, Name: res.Name, Freed: res.Freed, Trashed: res.Trashed, Removed: res.Removed, Skipped: res.Skipped,
 			Notes: append([]string{}, res.Notes...), Errors: append([]string{}, res.Errors...),
 		})
 		sum.Freed += res.Freed
+		sum.Trashed += res.Trashed
 		if ctx.Err() != nil {
 			break
 		}

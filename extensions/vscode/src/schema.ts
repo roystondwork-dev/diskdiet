@@ -37,6 +37,7 @@ export interface SourceResult {
   id: string;
   name: string;
   freedBytes: number;
+  trashedBytes?: number;
   removed: number;
   skipped?: string;
   notes?: string[];
@@ -50,4 +51,5 @@ export interface CleanData {
   plan: SourceReport[];
   results: SourceResult[];
   freedBytes: number;
+  trashedBytes?: number;
 }

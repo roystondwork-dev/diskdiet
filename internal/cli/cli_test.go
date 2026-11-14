@@ -491,3 +491,49 @@ func TestDemoJSONProjectsAndKeep(t *testing.T) {
 		t.Fatalf("kept folder still planned: %s", out.String())
 	}
 }
+
+// trashSource reports what a clean moved to the Trash when asked to.
+type trashSource struct{ gotTrash bool }
+
+func (s *trashSource) ID() string   { return "node_modules" }
+func (s *trashSource) Name() string { return "node_modules" }
+func (s *trashSource) Scan(context.Context, source.Options) *source.Report {
+	return &source.Report{ID: "node_modules", Name: "node_modules", Found: true, Bytes: 5e9, Items: 2, PrunableBytes: 3e9, PrunableItems: 1}
+}
+
+func (s *trashSource) Clean(_ context.Context, _ *source.Report, o source.Options) *source.Result {
+	s.gotTrash = o.Trash
+	if o.Trash {
+		return &source.Result{ID: "node_modules", Name: "node_modules", Trashed: 3e9, Removed: 1}
+	}
+	return &source.Result{ID: "node_modules", Name: "node_modules", Freed: 3e9, Removed: 1}
+}
+
+func TestCleanTrash(t *testing.T) {
+	src := &trashSource{}
+	run := func(args ...string) string {
+		var out bytes.Buffer
+		d := Deps{
+			Sources: func() ([]source.Source, string, error) { return []source.Source{src}, "/home/me", nil },
+			Busy:    func(context.Context) (map[string]string, error) { return nil, nil },
+			Now:     time.Now, In: strings.NewReader(""), Out: &out, Err: io.Discard,
+		}
+		if code := Execute(context.Background(), d, args); code != ExitOK {
+			t.Fatalf("%v: exit %d", args, code)
+		}
+		return out.String()
+	}
+	text := run("clean", "--yes", "--trash")
+	if !src.gotTrash || !strings.Contains(text, "moved to the Trash") || !strings.Contains(text, "Moved 3.0 GB to the Trash") || !strings.Contains(text, "Freed 0 B.") {
+		t.Fatalf("text = %s", text)
+	}
+	if js := run("clean", "--yes", "--trash", "--json"); !strings.Contains(js, `"trashedBytes": 3000000000`) {
+		t.Fatalf("json = %s", js)
+	}
+	if text := run("clean", "--dry-run", "--trash"); !strings.Contains(text, "to the Trash") {
+		t.Fatalf("plan = %s", text)
+	}
+	if text := run("clean", "--yes"); src.gotTrash || strings.Contains(text, "Trash") {
+		t.Fatalf("without --trash: %s", text)
+	}
+}

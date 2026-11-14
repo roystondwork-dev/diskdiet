@@ -36,6 +36,15 @@ Free about 3.5 GB? [y/N]
 
 Bringing one back is just `npm install` (or `pnpm i`, `yarn`, `bun i`) in that project.
 
+## Want an undo?
+
+```sh
+npx diskdiet clean --only node_modules --trash
+```
+
+moves the folders to the Trash (Recycle Bin on Windows) instead of deleting them, so you
+can put one back. The space is freed when you empty the Trash.
+
 ## Keep some
 
 ```sh

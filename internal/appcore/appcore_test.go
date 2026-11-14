@@ -301,3 +301,27 @@ func TestScanOnlyAndProjects(t *testing.T) {
 		t.Errorf("npm opts = %+v; docker scanned = %v", npm.opts, !docker.opts.Now.IsZero())
 	}
 }
+
+type trashSrc struct{ fakeSource }
+
+func (f *trashSrc) Clean(_ context.Context, _ *source.Report, o source.Options) *source.Result {
+	f.cleaned++
+	if o.Trash {
+		return &source.Result{ID: f.id, Name: f.name, Trashed: 7}
+	}
+	return &source.Result{ID: f.id, Name: f.name, Freed: 7}
+}
+
+func TestCleanTrash(t *testing.T) {
+	nm := &trashSrc{fakeSource{id: "node_modules", name: "node_modules", report: source.Report{Found: true, Bytes: 10, PrunableBytes: 7, PrunableItems: 1}}}
+	c := New(Deps{
+		Sources: func() ([]source.Source, string, error) { return []source.Source{nm}, home, nil },
+		Busy:    func(context.Context) (map[string]string, error) { return nil, nil },
+		Now:     func() time.Time { return now },
+	})
+	_, _ = c.Scan(context.Background(), ScanRequest{}, nil)
+	sum, err := c.Clean(context.Background(), CleanRequest{IDs: []string{"node_modules"}, Trash: true}, nil)
+	if err != nil || sum.Trashed != 7 || sum.Freed != 0 || sum.Results[0].Trashed != 7 {
+		t.Fatalf("summary = %+v, %v", sum, err)
+	}
+}

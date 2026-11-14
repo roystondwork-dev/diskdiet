@@ -167,6 +167,14 @@ describe("free", () => {
       "Docker: freed 1.0 GB; 1 could not be removed (denied)",
     ]);
     expect(summarizeClean({ ...c, results: [], freedBytes: 0 }).message).toBe("diskdiet: nothing was old enough to remove.");
+    const t = summarizeClean({
+      ...c,
+      freedBytes: 0,
+      trashedBytes: 2 * GB,
+      results: [{ id: "node_modules", name: "node_modules", freedBytes: 0, trashedBytes: 2 * GB, removed: 3 }],
+    });
+    expect(t.message).toBe("diskdiet freed 0 B. Moved 2.0 GB to the Trash: empty it to free that space too.");
+    expect(t.details).toEqual(["node_modules: moved 2.0 GB to the Trash"]);
     expect(summarizeClean({ ...c, results: [{ id: "x", name: "X", freedBytes: 1, removed: 1, errors: [] }] }).problems).toBe(false);
   });
 });

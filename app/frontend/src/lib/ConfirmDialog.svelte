@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { SourceView } from "../../bindings/github.com/roystondwork-dev/diskdiet/internal/appcore/models";
-  import { formatBytes, describe } from "./format";
+  import { formatBytes, describe, isProjects } from "./format";
 
   let {
     sources,
     freeFor,
     volumes,
+    trashProjects,
     olderThanDays,
     total,
     estimate,
@@ -16,6 +17,7 @@
     sources: SourceView[];
     freeFor: (s: SourceView) => number;
     volumes: boolean;
+    trashProjects: boolean;
     olderThanDays: number;
     total: number;
     estimate: boolean;
@@ -39,6 +41,10 @@
     <p id="confirm-desc" class="muted">
       {olderThanDays === 0 ? "Everything in these caches" : `What hasn't been used for ${olderThanDays} days`} will be
       removed. Package managers download it again when a project needs it.
+      {#if trashProjects && sources.some((s) => isProjects(s.id))}
+        Project folders go to the Trash, so you can put them back; their space is freed when
+        you empty it.
+      {/if}
     </p>
     <ul>
       {#each sources as s (s.id)}

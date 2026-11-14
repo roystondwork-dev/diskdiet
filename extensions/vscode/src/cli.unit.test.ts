@@ -56,6 +56,8 @@ describe("DiskdietClient", () => {
     const c = new DiskdietClient("dd", fake({ stdout: JSON.stringify(doc), code: 3 }, calls));
     await expect(c.clean(["npm", "node_modules"], 0, ["/p/node_modules"])).resolves.toEqual(doc);
     expect(calls[0]).toEqual(["dd", "clean", "--json", "--yes", "--only", "npm,node_modules", "--all", "--keep", "/p/node_modules"]);
+    await c.clean(["node_modules"], 30, [], true);
+    expect(calls[1]?.at(-1)).toBe("--trash");
   });
 
   it("refuses an empty clean", async () => {

@@ -133,6 +133,7 @@ diskdiet scan --json                      # for scripts
 | `--volumes` | Also remove unused Docker volumes |
 | `--force` | Clean even while a package manager is installing |
 | `--keep DIR` | Leave this `node_modules` or `target` folder alone (repeatable) |
+| `--trash` | Move `node_modules` and `target` folders to the Trash instead of deleting them, so you can put them back (freed when you empty the Trash) |
 | `--json` | Machine-readable output |
 
 ## What it cleans, and how

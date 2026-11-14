@@ -244,6 +244,8 @@ export function summarizeClean(c: CleanData): CleanSummary {
     } else if (r.errors && r.errors.length > 0) {
       problems = true;
       details.push(`${r.name}: freed ${formatBytes(r.freedBytes)}; ${r.errors.length} could not be removed (${String(r.errors[0])})`);
+    } else if (r.trashedBytes) {
+      details.push(`${r.name}: moved ${formatBytes(r.trashedBytes)} to the Trash`);
     } else {
       details.push(`${r.name}: freed ${formatBytes(r.freedBytes)}`);
     }
@@ -251,10 +253,12 @@ export function summarizeClean(c: CleanData): CleanSummary {
       details.push(`${r.name}: ${n}`);
     }
   }
+  const trashed = c.trashedBytes ?? 0;
+  const trashNote = trashed > 0 ? ` Moved ${formatBytes(trashed)} to the Trash: empty it to free that space too.` : "";
   const message =
     c.results.length === 0
       ? "diskdiet: nothing was old enough to remove."
-      : `diskdiet freed ${formatBytes(c.freedBytes)}.${problems ? " Some items were left; see the output." : ""}`;
+      : `diskdiet freed ${formatBytes(c.freedBytes)}.${trashNote}${problems ? " Some items were left; see the output." : ""}`;
   return { message, problems, details };
 }
 

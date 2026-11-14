@@ -504,3 +504,52 @@ func TestProjectSourcesShareOneWalk(t *testing.T) {
 		t.Fatal("All should share the finder")
 	}
 }
+
+func TestProjectsToTrash(t *testing.T) {
+	ctx := context.Background()
+	home := t.TempDir()
+	p := filepath.Join(home, "old")
+	writeFile(t, filepath.Join(p, "node_modules", "x.js"), strings.Repeat("x", 4000))
+	writeFile(t, filepath.Join(p, "package.json"), "{}")
+	age(t, filepath.Join(p, "package.json"), oldTime)
+	age(t, p, oldTime)
+	var moved []string
+	old := moveToTrash
+	moveToTrash = func(_ context.Context, path string) error {
+		moved = append(moved, path)
+		return os.RemoveAll(path)
+	}
+	t.Cleanup(func() { moveToTrash = old })
+
+	s := NewNodeModules(testEnv(home, "linux", nil, nil))
+	o := month
+	o.Trash = true
+	r := s.Scan(ctx, o)
+	res := s.Clean(ctx, r, o)
+	if len(moved) != 1 || moved[0] != filepath.Join(p, "node_modules") {
+		t.Fatalf("moved = %v", moved)
+	}
+	if res.Freed != 0 || res.Trashed != r.PrunableBytes || res.Removed != 1 || len(res.Notes) != 1 {
+		t.Fatalf("result = %+v", res)
+	}
+
+	// A failing move is reported, not hidden.
+	writeFile(t, filepath.Join(p, "node_modules", "x.js"), "x")
+	age(t, p, oldTime) // recreating node_modules touched the project folder
+	moveToTrash = func(context.Context, string) error { return errors.New("no Trash here") }
+	r = s.Scan(ctx, o)
+	if res := s.Clean(ctx, r, o); len(res.Errors) != 1 || res.Removed != 0 || len(res.Notes) != 0 {
+		t.Fatalf("failing move: %+v", res)
+	}
+	// A planned folder outside its project is refused before any move.
+	bad := &Report{plan: []entryPlan{{root: filepath.Join(home, "a"), entries: []fsx.Entry{{Path: filepath.Join(home, "b", "node_modules")}}}}}
+	if res := s.Clean(ctx, bad, o); len(res.Errors) != 1 || !strings.Contains(res.Errors[0], "outside") {
+		t.Fatalf("outside: %+v", res)
+	}
+	age(t, p, oldTime)
+	ctx2, cancel := context.WithCancel(ctx)
+	cancel()
+	if res := s.Clean(ctx2, s.Scan(ctx, o), o); len(res.Errors) == 0 {
+		t.Error("a cancelled clean should report it")
+	}
+}

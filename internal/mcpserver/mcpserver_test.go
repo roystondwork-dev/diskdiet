@@ -248,3 +248,48 @@ func TestDescribe(t *testing.T) {
 		t.Error("firstNonEmpty")
 	}
 }
+
+func TestFreeToTrash(t *testing.T) {
+	e := connect(t, "")
+	call[ScanOutput](t, e.session, "scan_disk_usage", nil)
+	out, res := call[FreeOutput](t, e.session, "free_disk_space", map[string]any{"sources": []string{"npm"}, "move_projects_to_trash": true})
+	if res.IsError || out.FreedBytes != 30*gb {
+		t.Fatalf("out = %+v (%s)", out, errText(res))
+	}
+	// The fake sources free rather than trash, so no Trash line appears.
+	if out.Trashed != "" || strings.Contains(out.Summary, "Trash") {
+		t.Errorf("out = %+v", out)
+	}
+}
+
+type trashingSource struct{ fakeSource }
+
+func (f *trashingSource) Clean(_ context.Context, _ *source.Report, o source.Options) *source.Result {
+	if o.Trash {
+		return &source.Result{ID: f.id, Name: f.name, Trashed: 4 * gb, Removed: 1}
+	}
+	return &source.Result{ID: f.id, Name: f.name, Freed: 4 * gb, Removed: 1}
+}
+
+func TestFreeReportsTrash(t *testing.T) {
+	nm := &trashingSource{fakeSource{id: "node_modules", name: "node_modules", report: source.Report{Found: true, Bytes: 9 * gb, PrunableBytes: 4 * gb, PrunableItems: 1}}}
+	core := appcore.New(appcore.Deps{
+		Sources: func() ([]source.Source, string, error) { return []source.Source{nm}, "", nil },
+		Busy:    func(context.Context) (map[string]string, error) { return nil, nil },
+		Now:     time.Now,
+	})
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := New("1", core).Connect(context.Background(), st, nil); err != nil {
+		t.Fatal(err)
+	}
+	cs, err := mcp.NewClient(&mcp.Implementation{Name: "t", Version: "1"}, nil).Connect(context.Background(), ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = cs.Close() })
+	call[ScanOutput](t, cs, "scan_disk_usage", nil)
+	out, res := call[FreeOutput](t, cs, "free_disk_space", map[string]any{"sources": []string{"node_modules"}, "move_projects_to_trash": true})
+	if res.IsError || out.TrashedBytes != 4*gb || out.Trashed != "4.0 GB" || !strings.Contains(out.Summary, "Moved 4.0 GB of project folders to the Trash") {
+		t.Fatalf("out = %+v (%s)", out, errText(res))
+	}
+}

@@ -28,6 +28,7 @@ the cache; for Go's build cache it's the last time Go used it; for `node_modules
 | `--skip node_modules` | Everything but these |
 | `--projects ~/code` | Where to look for `node_modules` and `target` folders (repeatable; default: your home folder) |
 | `--keep DIR` | Leave this `node_modules` or `target` folder alone (repeatable) |
+| `--trash` | Move `node_modules` and `target` folders to the Trash (Recycle Bin on Windows) instead of deleting them; see below |
 | `--volumes` | Also remove unused Docker volumes (they can hold databases) |
 
 Source names: `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`, `maven`,
@@ -45,6 +46,17 @@ Source names: `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`
 
 Without a terminal (in a script), `clean` refuses to run unless you pass `--yes` or
 `--dry-run`.
+
+## Undo: move project folders to the Trash
+
+```sh
+diskdiet clean --only node_modules --trash
+```
+
+`node_modules` and `target` folders go to the macOS Trash, the Windows Recycle Bin or the
+Linux desktop Trash, so you can put any of them back. Their space is freed when you empty
+the Trash, so on a full disk, clean without `--trash`. Caches are always deleted: everything
+in them downloads again anyway.
 
 ## Safety rules
 

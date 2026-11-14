@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/roystondwork-dev/diskdiet/internal/fsx"
+	"github.com/roystondwork-dev/diskdiet/internal/trash"
 	"github.com/roystondwork-dev/diskdiet/internal/units"
 )
 
@@ -215,12 +217,40 @@ func (s *projectSource) Scan(ctx context.Context, o Options) *Report {
 	return r
 }
 
-func (s *projectSource) Clean(ctx context.Context, r *Report, _ Options) *Result {
+func (s *projectSource) Clean(ctx context.Context, r *Report, o Options) *Result {
 	res := &Result{ID: s.ID(), Name: s.Name()}
 	plans, _ := r.plan.([]entryPlan)
-	removeEntries(ctx, plans, res)
+	if !o.Trash {
+		removeEntries(ctx, plans, res)
+		return res
+	}
+	for _, p := range plans {
+		for _, e := range p.entries {
+			if ctx.Err() != nil {
+				res.fail(ctx.Err())
+				return res
+			}
+			// The same check as fsx.Remove: only a folder inside its project.
+			if !fsx.Within(p.root, e.Path) || filepath.Clean(p.root) == filepath.Clean(e.Path) {
+				res.fail(fmt.Errorf("%w: %s", fsx.ErrOutsideRoot, e.Path))
+				continue
+			}
+			if err := moveToTrash(ctx, e.Path); err != nil {
+				res.fail(err)
+				continue
+			}
+			res.Trashed += e.Usage.Exclusive
+			res.Removed++
+		}
+	}
+	if res.Removed > 0 {
+		res.Notes = append(res.Notes, "moved to the Trash: empty it to free the space, or put folders back from it")
+	}
 	return res
 }
+
+// moveToTrash moves a folder to the system Trash. Replaced in tests.
+var moveToTrash = trash.Move
 
 // Projects lists the planned node_modules folders with their project's age,
 // for previews.

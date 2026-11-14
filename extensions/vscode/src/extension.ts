@@ -45,6 +45,7 @@ interface Settings {
   warnAboveGB: number;
   checkEveryHours: number;
   detectDiskFull: boolean;
+  trashProjectFolders: boolean;
 }
 
 function settings(): Settings {
@@ -56,6 +57,7 @@ function settings(): Settings {
     warnAboveGB: c.get<number>("warnAboveGB", 10),
     checkEveryHours: c.get<number>("checkEveryHours", 6),
     detectDiskFull: c.get<boolean>("detectDiskFull", true),
+    trashProjectFolders: c.get<boolean>("trashProjectFolders", false),
   };
 }
 
@@ -348,7 +350,7 @@ class Diskdiet implements vscode.TreeDataProvider<Node>, vscode.Disposable {
     try {
       const result = await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: `diskdiet: freeing space in ${names}…` },
-        () => this.client().clean(ids, days, keep),
+        () => this.client().clean(ids, days, keep, settings().trashProjectFolders),
       );
       const sum = summarizeClean(result);
       for (const line of sum.details) {

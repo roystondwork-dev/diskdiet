@@ -10,6 +10,12 @@
 <section aria-live="polite">
   <div class="hero-figure">{formatBytes(result.freed)}</div>
   <div class="caption">freed{problems ? ", with some items left behind (see below)" : ""}</div>
+  {#if result.trashed > 0}
+    <p class="trashed">
+      {formatBytes(result.trashed)} of project folders went to the Trash. Empty the Trash to free
+      that space too, or put a folder back from it.
+    </p>
+  {/if}
 
   <ul>
     {#each results as r (r.id)}
@@ -22,7 +28,7 @@
             {:else if r.errors?.length}
               <span class="warn"><span aria-hidden="true">⚠</span> {formatBytes(r.freed)}, {r.errors.length} not removed</span>
             {:else}
-              <span class="ok"><span aria-hidden="true">✓</span> {formatBytes(r.freed)}</span>
+              <span class="ok"><span aria-hidden="true">✓</span> {r.trashed > 0 ? `${formatBytes(r.trashed)} to the Trash` : formatBytes(r.freed)}</span>
             {/if}
           </span>
         </div>
@@ -45,6 +51,11 @@
     font-weight: 650;
     line-height: 1.05;
     letter-spacing: -0.02em;
+  }
+  .trashed {
+    margin: -8px 0 20px;
+    color: var(--text-secondary);
+    max-width: 720px;
   }
   .caption {
     color: var(--text-secondary);
