@@ -84,7 +84,7 @@ describe("sources", () => {
   it("knows project sources, safe defaults and descriptions", () => {
     expect(isProjects("target") && isProjects("node_modules") && !isProjects("npm")).toBe(true);
     expect(safeByDefault("npm") && !safeByDefault("docker") && !safeByDefault("target")).toBe(true);
-    for (const id of ["npm", "yarn", "bun", "pnpm", "pip", "uv", "cargo", "go", "gradle", "maven", "playwright", "cypress", "xcode", "docker", "node_modules", "target"]) {
+    for (const id of ["npm", "yarn", "bun", "pnpm", "pip", "uv", "cargo", "go", "gradle", "maven", "playwright", "cypress", "xcode", "simulators", "cocoapods", "swiftpm", "android", "homebrew", "docker", "node_modules", "target"]) {
       expect(describeSource(id)).not.toBe("");
     }
     expect(describeSource("nope")).toBe("");

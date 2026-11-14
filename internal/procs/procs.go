@@ -60,6 +60,8 @@ func managerOf(base string) string {
 		return "cargo"
 	case "go":
 		return "go"
+	case "brew":
+		return "homebrew"
 	}
 	if strings.HasPrefix(base, "yarn-") && strings.HasSuffix(base, ".cjs") {
 		return "yarn"
@@ -89,8 +91,16 @@ var (
 	}
 )
 
+// brewVerbs are Homebrew commands that download into or read its cache.
+var brewVerbs = map[string]bool{
+	"install": true, "reinstall": true, "upgrade": true, "fetch": true, "update": true,
+	"bundle": true, "cleanup": true,
+}
+
 func verbsFor(id string) map[string]bool {
 	switch id {
+	case "homebrew":
+		return brewVerbs
 	case "cargo":
 		return cargoVerbs
 	case "go":

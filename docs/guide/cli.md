@@ -31,7 +31,8 @@ the cache; for Go's build cache it's the last time Go used it; for `node_modules
 | `--volumes` | Also remove unused Docker volumes (they can hold databases) |
 
 Source names: `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`, `maven`,
-`playwright`, `cypress`, `xcode`, `docker`, `node_modules`, `target`.
+`playwright`, `cypress`, `xcode`, `simulators`, `cocoapods`, `swiftpm`, `android`, `homebrew`,
+`docker`, `node_modules`, `target`.
 
 ## Confirming
 

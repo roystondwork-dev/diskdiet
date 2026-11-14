@@ -21,7 +21,8 @@ import (
 
 const instructions = `diskdiet finds the disk space developer tools use: package caches (npm, Yarn,
 pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven), browser test downloads (Playwright,
-Cypress), Xcode, Docker, and the node_modules and target folders of projects
+Cypress), Xcode and its simulators, CocoaPods, Swift PM, the Android SDK, Homebrew,
+Docker, and the node_modules and target folders of projects
 nobody has touched lately. When the user is low on disk space or asks what is
 using it, call scan_disk_usage and summarize the biggest items. Only if the user
 then wants to free space, call free_disk_space with the sources they chose. It
@@ -135,6 +136,16 @@ func describe(id string, volumes bool) string {
 		return "older Cypress versions (the newest stays)"
 	case "xcode":
 		return "DerivedData and device support files (never Archives)"
+	case "simulators":
+		return "simulators for iOS versions no longer installed, and old simulator caches"
+	case "cocoapods":
+		return "old pod versions in CocoaPods' download cache (never a project's Pods)"
+	case "swiftpm":
+		return "cached Swift package repositories and artifacts"
+	case "android":
+		return "system images no emulator uses, older NDKs and build tools (the newest stay)"
+	case "homebrew":
+		return "old downloads in Homebrew's cache (installed software stays)"
 	case "docker":
 		if volumes {
 			return "unused images, stopped containers, build cache and unused volumes"

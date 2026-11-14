@@ -101,3 +101,12 @@ func TestClassifyMoreTools(t *testing.T) {
 		}
 	}
 }
+
+func TestClassifyBrew(t *testing.T) {
+	if id, _ := classify(Proc{Name: "brew", Cmdline: []string{"/opt/homebrew/bin/brew", "install", "wget"}}); id != "homebrew" {
+		t.Errorf("brew install: %q", id)
+	}
+	if id, _ := classify(Proc{Name: "brew", Cmdline: []string{"brew", "list"}}); id != "" {
+		t.Errorf("brew list: %q", id)
+	}
+}

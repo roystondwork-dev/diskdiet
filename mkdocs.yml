@@ -88,7 +88,8 @@ nav:
       - Old node_modules folders: fix/node-modules.md
       - Docker uses too much disk: fix/docker.md
       - pip and uv caches: fix/python.md
-      - Xcode DerivedData and simulators: fix/xcode.md
+      - Xcode, simulators, CocoaPods: fix/xcode.md
+      - Android SDK: fix/android.md
       - Cargo, Go, Gradle, Maven: fix/others.md
       - Playwright and Cypress downloads: fix/browsers.md
       - "GitHub Actions: no space left": fix/github-actions.md
