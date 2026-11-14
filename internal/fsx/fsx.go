@@ -23,6 +23,10 @@ type Usage struct {
 	Exclusive int64 `json:"exclusiveBytes"`
 	// Files is the number of regular files.
 	Files int `json:"files"`
+	// ExclusiveFiles is the number of regular files counted in Exclusive.
+	// Folders take space too (4 kB each on Linux), so Exclusive alone can't
+	// tell an empty tree from one with files to free.
+	ExclusiveFiles int `json:"exclusiveFiles"`
 }
 
 // Add accumulates u2 into u.
@@ -30,6 +34,7 @@ func (u *Usage) Add(u2 Usage) {
 	u.Bytes += u2.Bytes
 	u.Exclusive += u2.Exclusive
 	u.Files += u2.Files
+	u.ExclusiveFiles += u2.ExclusiveFiles
 }
 
 // Options control measurement.
@@ -82,6 +87,9 @@ func DirSize(ctx context.Context, path string, opts Options) (Usage, error) {
 		}
 		if !opts.CountLinks || st.links <= 1 || info.IsDir() {
 			u.Exclusive += st.bytes
+			if info.Mode().IsRegular() {
+				u.ExclusiveFiles++
+			}
 		}
 		return nil
 	})

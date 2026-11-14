@@ -25,9 +25,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-      # The tests touch the filesystem, so allow each mutant's run more time.
+      # scripts/mutation.sh fails the job below the minimum test efficacy
+      # (gremlins' own threshold flag is ignored in v0.6.0).
       - name: Mutation test internal/${{ matrix.package }}
-        run: >
-          go tool -modfile=tools/go.mod gremlins unleash
-          --workers 2 --timeout-coefficient 10 --threshold-efficacy 75
-          ./internal/${{ matrix.package }}
+        run: scripts/mutation.sh ./internal/${{ matrix.package }} 75

@@ -140,10 +140,6 @@ func (s *dirSource) Clean(ctx context.Context, r *Report, _ Options) *Result {
 // cache (one zip per package).
 func NewYarn(env Env) Source {
 	return &dirSource{id: "yarn", name: "Yarn cache", locate: func(context.Context) []location {
-		var roots []string
-		if v := env.Getenv("YARN_CACHE_FOLDER"); v != "" {
-			roots = append(roots, v)
-		}
 		var v1 string
 		switch env.GOOS {
 		case "darwin":
@@ -153,22 +149,27 @@ func NewYarn(env Env) Source {
 		default:
 			v1 = filepath.Join(env.cacheHome(), "yarn")
 		}
-		// Yarn 1 keeps a versioned folder (v6) inside its cache folder.
-		for _, root := range append(roots, v1) {
-			matches, _ := filepath.Glob(filepath.Join(root, "v[0-9]*"))
+		// Yarn 1 keeps its packages in a versioned folder (v6) inside its cache
+		// folder. A folder that has versioned folders is never itself a
+		// location: its versioned folder would be counted twice, and could be
+		// removed whole as if it were one package.
+		var roots []string
+		if v := env.Getenv("YARN_CACHE_FOLDER"); v != "" {
+			matches, _ := filepath.Glob(filepath.Join(v, "v[0-9]*"))
 			if len(matches) == 0 {
-				roots = appendUnique(roots, root)
+				roots = append(roots, v) // YARN_CACHE_FOLDER may point at v6 itself
 			}
 			for _, m := range matches {
 				roots = appendUnique(roots, m)
 			}
 		}
+		matches, _ := filepath.Glob(filepath.Join(v1, "v[0-9]*"))
+		for _, m := range matches {
+			roots = appendUnique(roots, m)
+		}
 		roots = appendUnique(roots, filepath.Join(env.Home, ".yarn", "berry", "cache"))
 		locs := make([]location, 0, len(roots))
 		for _, r := range roots {
-			if r == v1 {
-				continue // only its versioned folders hold packages
-			}
 			locs = append(locs, location{root: r, skip: hidden})
 		}
 		return locs

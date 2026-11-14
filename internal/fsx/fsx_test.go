@@ -289,3 +289,25 @@ func FuzzWithin(f *testing.F) {
 		}
 	})
 }
+
+func TestExclusiveFilesIgnoresFolders(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "a", "b"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	u, err := DirSize(context.Background(), root, Options{CountLinks: true})
+	if err != nil || u.ExclusiveFiles != 0 || u.Files != 0 {
+		t.Fatalf("empty folders: %+v %v", u, err)
+	}
+	write(t, filepath.Join(root, "a", "f"), 10)
+	u, _ = DirSize(context.Background(), root, Options{CountLinks: true})
+	if u.ExclusiveFiles != 1 || u.Files != 1 {
+		t.Fatalf("one file: %+v", u)
+	}
+	var sum Usage
+	sum.Add(u)
+	sum.Add(u)
+	if sum.ExclusiveFiles != 2 {
+		t.Fatalf("Add: %+v", sum)
+	}
+}
