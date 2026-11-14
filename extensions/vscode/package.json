@@ -212,9 +212,9 @@
     "@vscode/vsce": "4.1.0",
     "esbuild": "0.28.2",
     "eslint": "10.14.0",
-    "ovsx": "1.3.0",
+    "ovsx": "1.4.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.1",
+    "typescript-eslint": "8.72.2",
     "vitest": "5.1.0"
   },
   "allowScripts": {
