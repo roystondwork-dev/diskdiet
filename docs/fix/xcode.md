@@ -20,10 +20,21 @@ builds for the App Store.
 
 ## Simulators
 
-Old simulator runtimes aren't removed by diskdiet yet. Xcode can do it:
-
 ```sh
-xcrun simctl delete unavailable     # simulators for runtimes you no longer have
+npx diskdiet clean --only simulators
 ```
 
-or **Xcode → Settings → Platforms** to remove whole runtimes.
+removes simulators for iOS, watchOS and tvOS versions that are no longer installed
+(diskdiet runs Xcode's own `xcrun simctl delete unavailable`) and simulator caches not
+used for 30 days. Simulators you can still run are never touched. To remove whole
+runtimes you no longer need, use **Xcode → Settings → Platforms**.
+
+## CocoaPods and Swift packages
+
+```sh
+npx diskdiet clean --only cocoapods,swiftpm
+```
+
+removes old pod versions from CocoaPods' download cache and old Swift Package Manager
+repositories and artifacts. Your projects' `Pods` folders and `Package.resolved` are never
+touched.

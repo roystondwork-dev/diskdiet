@@ -16,6 +16,10 @@ clean removes what diskdiet scan reports as old enough:
   Playwright,        older browser and app versions; the newest always stays
   Cypress
   Xcode              DerivedData and device support files (never Archives)
+  Simulators         simulators for iOS versions no longer installed, old caches
+  CocoaPods, SwiftPM old pod versions and cached Swift packages
+  Android SDK        system images no emulator uses; older NDKs and build tools
+  Homebrew           old downloads in brew --cache (installed software stays)
   node_modules,      in projects where nothing has changed for --older-than
   target (Rust, Maven)
 
@@ -44,7 +48,7 @@ diskdiet clean [flags]
       --json                   print JSON
       --keep stringArray       leave this node_modules or target folder alone (repeatable)
       --older-than string      count things unchanged for this long as old (e.g. 7d, 2w, 12h) (default "30d")
-      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, docker, node_modules, target
+      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, simulators, cocoapods, swiftpm, android, homebrew, docker, node_modules, target
       --projects stringArray   folder to search for node_modules (repeatable; default: your home folder)
       --skip strings           leave out these sources
       --volumes                also remove unused Docker volumes (they can hold databases)

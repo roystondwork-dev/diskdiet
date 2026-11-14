@@ -44,6 +44,10 @@ func newClean(d Deps) *cobra.Command {
   Playwright,        older browser and app versions; the newest always stays
   Cypress
   Xcode              DerivedData and device support files (never Archives)
+  Simulators         simulators for iOS versions no longer installed, old caches
+  CocoaPods, SwiftPM old pod versions and cached Swift packages
+  Android SDK        system images no emulator uses; older NDKs and build tools
+  Homebrew           old downloads in brew --cache (installed software stays)
   node_modules,      in projects where nothing has changed for --older-than
   target (Rust, Maven)
 
@@ -270,6 +274,8 @@ func planDetail(r *source.Report, o source.Options) string {
 		return "the whole cache (uv cache clean)"
 	case "playwright", "cypress":
 		return "older versions; the newest stays"
+	case "simulators":
+		return "unavailable simulators, old caches"
 	case "node_modules", "target":
 		return "projects you haven't touched"
 	default:

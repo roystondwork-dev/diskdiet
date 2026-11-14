@@ -71,6 +71,16 @@ export function describe(id: string, volumes: boolean): string {
       return "Older Cypress versions; the newest stays";
     case "xcode":
       return "DerivedData and device support files (never Archives)";
+    case "simulators":
+      return "Simulators for iOS versions no longer installed, and old simulator caches";
+    case "cocoapods":
+      return "Old pod versions in the download cache (never a project's Pods)";
+    case "swiftpm":
+      return "Cached Swift package repositories and artifacts";
+    case "android":
+      return "System images no emulator uses, older NDKs and build tools; the newest stay";
+    case "homebrew":
+      return "Old downloads in Homebrew's cache; installed software stays";
     case "node_modules":
       return "node_modules of projects you haven't touched";
     case "target":

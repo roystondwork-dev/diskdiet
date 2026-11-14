@@ -126,7 +126,7 @@ diskdiet scan --json                      # for scripts
 |---|---|
 | `--older-than 30d` | What counts as old: `12h`, `7d`, `2w`… |
 | `--all` | Everything, whatever its age |
-| `--only`, `--skip` | `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`, `maven`, `playwright`, `cypress`, `xcode`, `docker`, `node_modules`, `target` |
+| `--only`, `--skip` | `npm`, `yarn`, `pnpm`, `bun`, `pip`, `uv`, `cargo`, `go`, `gradle`, `maven`, `playwright`, `cypress`, `xcode`, `simulators`, `cocoapods`, `swiftpm`, `android`, `homebrew`, `docker`, `node_modules`, `target` |
 | `--projects DIR` | Where to look for `node_modules` (repeatable; default: your home folder) |
 | `-n`, `--dry-run` | Show what `clean` would remove, remove nothing |
 | `-y`, `--yes` | Don't ask (for scripts and CI) |
@@ -152,6 +152,10 @@ diskdiet scan --json                      # for scripts
 | **Playwright** | `ms-playwright` cache | Older browser revisions; the newest of each browser always stays |
 | **Cypress** | Cypress cache | Older Cypress versions; the newest always stays |
 | **Xcode** (macOS) | `~/Library/Developer/Xcode` | DerivedData and iOS/watchOS/tvOS DeviceSupport older than the cutoff; never Archives |
+| **Simulators** (macOS) | `~/Library/Developer/CoreSimulator` | Simulators for runtimes no longer installed (`xcrun simctl delete unavailable`), old simulator caches |
+| **CocoaPods**, **Swift PM** | their download caches | Old pod versions and cached Swift packages; never a project's `Pods` |
+| **Android SDK** | `ANDROID_HOME` | System images no emulator uses; older NDK and build-tools versions (the newest stay) |
+| **Homebrew** | `brew --cache` | Old downloads; installed software stays |
 | **Docker** | your current docker context | Unused images, stopped containers and build cache older than the cutoff; volumes only with `--volumes` ([details](docs/docker.md)) |
 | **node_modules** | projects under your home folder | `node_modules` of projects where nothing has changed for the cutoff |
 | **target** | Rust (`Cargo.toml`) and Maven (`pom.xml`) projects under your home folder | Their `target` build folders, for projects where nothing has changed for the cutoff |

@@ -110,9 +110,13 @@ step "pnpm: only packages no project uses are pruned"
 install_global pnpm@10
 if command -v pnpm >/dev/null 2>&1; then
   project pnpm-app
-  echo "store-dir=$work/pnpm-store" > .npmrc
+  store="$work/pnpm-store"
+  # Git Bash paths (/tmp/...) mean something else to pnpm on Windows.
+  if command -v cygpath >/dev/null 2>&1; then store=$(cygpath -m "$store"); fi
+  echo "store-dir=$store" > .npmrc
   pnpm add --silent is-number@7.0.0 >/dev/null 2>&1
   before=$(field pnpm bytes)
+  [ "$before" -gt 0 ] || fail "diskdiet didn't find the pnpm store ($store)"
   "$dd" clean --only pnpm --all --yes >/dev/null
   [ -e node_modules/is-number/package.json ] || fail "pnpm prune broke a project in use"
   pass "a project in use survives pnpm store prune (store: $before bytes)"

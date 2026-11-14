@@ -13,7 +13,7 @@ diskdiet scan [flags]
   -h, --help                   help for scan
       --json                   print JSON
       --older-than string      count things unchanged for this long as old (e.g. 7d, 2w, 12h) (default "30d")
-      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, docker, node_modules, target
+      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, simulators, cocoapods, swiftpm, android, homebrew, docker, node_modules, target
       --projects stringArray   folder to search for node_modules (repeatable; default: your home folder)
       --skip strings           leave out these sources
 ```

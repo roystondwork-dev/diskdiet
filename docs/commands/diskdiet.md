@@ -5,7 +5,8 @@ See where your developer disk space went, and get it back safely
 ### Synopsis
 
 diskdiet measures the caches developer tools leave behind (npm, Yarn, pnpm,
-Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, Docker) and
+Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode, simulators,
+CocoaPods, Swift PM, Android SDK, Homebrew, Docker) and
 the node_modules and target folders of projects you haven't touched, then frees
 what is old: not used in 30 days by default.
 
@@ -31,7 +32,7 @@ diskdiet [flags]
   -h, --help                   help for diskdiet
       --json                   print JSON
       --older-than string      count things unchanged for this long as old (e.g. 7d, 2w, 12h) (default "30d")
-      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, docker, node_modules, target
+      --only strings           only these sources: npm, yarn, pnpm, bun, pip, uv, cargo, go, gradle, maven, playwright, cypress, xcode, simulators, cocoapods, swiftpm, android, homebrew, docker, node_modules, target
       --projects stringArray   folder to search for node_modules (repeatable; default: your home folder)
       --skip strings           leave out these sources
 ```

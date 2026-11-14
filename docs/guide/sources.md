@@ -112,13 +112,48 @@ removed from a cache is downloaded or rebuilt the next time a project needs it.
 - **Where:** the Cypress cache (or `CYPRESS_CACHE_FOLDER`).
 - **Removes:** older Cypress versions; the newest always stays.
 
+## Mobile
+
+### Android SDK
+
+- **Where:** `ANDROID_HOME` / `ANDROID_SDK_ROOT`, or Android Studio's default
+  (`~/Library/Android/sdk`, `~/Android/Sdk`, `%LocalAppData%\Android\Sdk`).
+- **Removes:** system images no emulator uses (diskdiet reads every AVD's `config.ini`),
+  and NDK and build-tools versions other than the newest, when older than the cutoff.
+  Emulators are never touched. See [Android SDK](../fix/android.md).
+
+### CocoaPods
+
+- **Where:** CocoaPods' download cache (`~/Library/Caches/CocoaPods`).
+- **Removes:** pod versions not changed for the cutoff. Projects' `Pods` folders stay.
+
+### Swift Package Manager
+
+- **Where:** `~/Library/Caches/org.swift.swiftpm`.
+- **Removes:** cached repositories and binary artifacts older than the cutoff.
+
 ## Apple
+
+### Xcode simulators (macOS)
+
+- **Where:** `~/Library/Developer/CoreSimulator`.
+- **Removes:** simulators for runtimes that are no longer installed (with Xcode's own
+  `xcrun simctl delete unavailable`, whatever their age) and simulator caches older than
+  the cutoff. Simulators you can still run are never touched.
 
 ### Xcode (macOS)
 
 - **Where:** `~/Library/Developer/Xcode`.
 - **Removes:** `DerivedData` (build products) and `iOS/watchOS/tvOS DeviceSupport`
   folders older than the cutoff. **Archives are never touched.**
+
+## Homebrew
+
+- **Where:** `brew --cache` (`~/Library/Caches/Homebrew`, `~/.cache/Homebrew`, or
+  `HOMEBREW_CACHE`).
+- **Removes:** downloaded bottles and source archives older than the cutoff, and the
+  shortcuts to them. Installed software is never touched; `brew` downloads a bottle again
+  if it needs one.
 
 ## Docker
 
