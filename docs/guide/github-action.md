@@ -9,7 +9,7 @@ description: Free disk space on GitHub Actions runners with the diskdiet action 
 Free disk space on a CI runner in one step:
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
 ```
 
 By default it removes **everything in every package cache** diskdiet knows (npm, Yarn,
@@ -23,7 +23,7 @@ GitHub's Linux runners come with large SDKs most jobs never use. Remove the ones
 don't need:
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
   with:
     remove-preinstalled: android,dotnet,haskell,codeql
 ```
@@ -64,7 +64,7 @@ warning. Remove `tool-cache` only if no later step uses `actions/setup-node`,
 | `free-after` | Free bytes after |
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
   id: diskdiet
   with:
     remove-preinstalled: android,dotnet
@@ -90,7 +90,7 @@ jobs:
   diskdiet:
     runs-on: self-hosted
     steps:
-      - uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+      - uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
         with:
           older-than: 7d
 ```
