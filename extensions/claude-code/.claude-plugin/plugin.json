@@ -1,6 +1,6 @@
 {
   "name": "diskdiet",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Free disk space safely: see what package caches (npm, pnpm, Yarn, Bun, pip, uv, Cargo, Go, Gradle, Maven), Docker, Xcode and old node_modules or target folders use, and remove what hasn't been used lately. Adds diskdiet's MCP tools and a skill that tells Claude when to use them.",
   "author": {
     "name": "Royston D",
