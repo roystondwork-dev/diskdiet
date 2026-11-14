@@ -1,0 +1,43 @@
+name: Integration
+
+# Real package managers fill real caches; diskdiet cleans them; installs must
+# still work and nothing outside the caches may change. See
+# scripts/integration.sh, which runs everything under a temporary fake home.
+on:
+  push:
+    branches: [main]
+    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", ".github/workflows/integration.yml"]
+  pull_request:
+    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", ".github/workflows/integration.yml"]
+  schedule:
+    - cron: "23 4 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Integration (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Build diskdiet
+        run: go build -o "$RUNNER_TEMP/diskdiet$([ "$RUNNER_OS" = Windows ] && echo .exe)" ./cmd/diskdiet
+      - name: Real caches, real cleans
+        run: scripts/integration.sh "$RUNNER_TEMP/diskdiet$([ "$RUNNER_OS" = Windows ] && echo .exe)"
