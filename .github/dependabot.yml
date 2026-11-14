@@ -24,6 +24,20 @@ updates:
     commit-message:
       prefix: "build(deps)"
   - package-ecosystem: npm
+    # Yarn and pnpm for the integration tests. Majors are skipped: the tests
+    # target Yarn 1 and pnpm 10 on purpose.
+    directory: /scripts/integration/tools
+    schedule:
+      interval: monthly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      integration-tools:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(deps)"
+  - package-ecosystem: npm
     directory: /extensions/vscode
     schedule:
       interval: weekly

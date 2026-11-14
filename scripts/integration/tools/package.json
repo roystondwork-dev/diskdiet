@@ -1,0 +1,9 @@
+{
+  "name": "diskdiet-integration-tools",
+  "private": true,
+  "description": "Package managers the integration tests drive, pinned by package-lock.json.",
+  "dependencies": {
+    "pnpm": "10.34.9",
+    "yarn": "1.22.22"
+  }
+}

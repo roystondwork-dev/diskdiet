@@ -6,9 +6,9 @@ name: Integration
 on:
   push:
     branches: [main]
-    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", ".github/workflows/integration.yml"]
+    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", "scripts/integration/**", ".github/workflows/integration.yml"]
   pull_request:
-    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", ".github/workflows/integration.yml"]
+    paths: ["internal/**", "cmd/**", "go.mod", "go.sum", "scripts/integration.sh", "scripts/integration/**", ".github/workflows/integration.yml"]
   schedule:
     - cron: "23 4 * * 3"
   workflow_dispatch:
