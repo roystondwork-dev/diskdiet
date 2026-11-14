@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.2...v0.6.3) (2026-11-14)
+
+
+### Bug Fixes
+
+* **yarn:** don't count a cache folder twice when it has a v6 folder ([#23](https://github.com/roystondwork-dev/diskdiet/issues/23)) ([e882d85](https://github.com/roystondwork-dev/diskdiet/commit/e882d85a41d4e21191c0315dc8ded4fec5a929be))
+
 ## [0.6.2](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.1...v0.6.2) (2026-11-12)
 
 

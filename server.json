@@ -18,12 +18,12 @@
       ]
     }
   ],
-  "version": "0.6.2",
+  "version": "0.6.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "diskdiet",
-      "version": "0.6.2",
+      "version": "0.6.3",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
