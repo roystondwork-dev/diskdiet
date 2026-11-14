@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.3...v0.7.0) (2026-11-14)
+
+
+### Features
+
+* --trash moves node_modules and target folders to the Trash ([#31](https://github.com/roystondwork-dev/diskdiet/issues/31)) ([d1f4d54](https://github.com/roystondwork-dev/diskdiet/commit/d1f4d54c5a2dda8dd7757e8c8737b0f5d77e7e0f))
+* **action:** GitHub Action to free disk space on CI runners ([#28](https://github.com/roystondwork-dev/diskdiet/issues/28)) ([413f8c7](https://github.com/roystondwork-dev/diskdiet/commit/413f8c724ada6af22d8ff6a0a07449c91776618d))
+* Android SDK, Homebrew, CocoaPods, Swift PM and Xcode simulators ([#30](https://github.com/roystondwork-dev/diskdiet/issues/30)) ([1455d44](https://github.com/roystondwork-dev/diskdiet/commit/1455d446d7964462737013244e797684ca83d6a3))
+
+
+### Build & Release
+
+* **deps:** Bump the vscode-npm-deps group ([#25](https://github.com/roystondwork-dev/diskdiet/issues/25)) ([b3cd655](https://github.com/roystondwork-dev/diskdiet/commit/b3cd655e8f0ed987ff0dd50831f43cc14c52cb51))
+
 ## [0.6.3](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.2...v0.6.3) (2026-11-14)
 
 
