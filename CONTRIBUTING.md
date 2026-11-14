@@ -16,6 +16,10 @@ make fuzz      # every fuzz target (FUZZTIME=30s each); CI runs them for 20 s
 make mutation  # mutation testing of the safety-critical packages (slow; weekly in CI)
 ```
 
+`scripts/integration.sh` fills real npm, Yarn, pnpm, pip, Go and Docker caches and
+cleans them for real, under a temporary fake home folder. CI runs it on every OS; on
+your own machine it needs `DISKDIET_INTEGRATION_LOCAL=1`.
+
 Optional: `lefthook install` sets up git hooks that format code, check commit
 messages and run lint and tests before pushing.
 
