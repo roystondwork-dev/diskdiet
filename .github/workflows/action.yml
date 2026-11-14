@@ -1,0 +1,94 @@
+name: GitHub Action
+
+on:
+  push:
+    branches: [main]
+    paths: [action.yml, docs/install.sh, docs/install.ps1, .github/workflows/action.yml]
+  pull_request:
+    paths: [action.yml, docs/install.sh, docs/install.ps1, .github/workflows/action.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  action:
+    name: Action (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fill the npm cache, and make a project with node_modules
+        run: |
+          npm cache add left-pad@1.3.0 is-number@7.0.0 >/dev/null
+          mkdir -p demo-project/node_modules/x
+          echo '{}' > demo-project/package.json
+          echo 'x' > demo-project/node_modules/x/index.js
+
+      - name: Dry run
+        id: dry
+        uses: ./
+        with:
+          only: npm
+          dry-run: "true"
+      - name: Check the dry run removed nothing
+        env:
+          FREED: ${{ steps.dry.outputs.freed-bytes }}
+        run: |
+          [ "$FREED" = "0" ] || { echo "::error::dry run freed $FREED"; exit 1; }
+          diskdiet scan --only npm --json | jq -e '.sources[0].bytes > 0'
+
+      - name: Clean the npm cache
+        id: clean
+        uses: ./
+        with:
+          only: npm
+      - name: Check it freed space, and only from npm
+        env:
+          FREED: ${{ steps.clean.outputs.freed-bytes }}
+          BEFORE: ${{ steps.clean.outputs.free-before }}
+          AFTER: ${{ steps.clean.outputs.free-after }}
+        run: |
+          echo "freed $FREED bytes; free space $BEFORE -> $AFTER"
+          [ "$FREED" -gt 0 ] || { echo "::error::expected bytes freed, got '$FREED'"; exit 1; }
+          [ "$BEFORE" -gt 0 ] && [ "$AFTER" -gt 0 ]
+          npm cache verify >/dev/null
+
+      - name: Default run (every cache but project folders)
+        uses: ./
+      - name: Check the project's node_modules is still there
+        run: test -f demo-project/node_modules/x/index.js
+
+      - name: Remove a preinstalled toolchain
+        if: runner.os == 'Linux'
+        id: pre
+        uses: ./
+        with:
+          only: npm
+          remove-preinstalled: dotnet
+      - name: Check it made room
+        if: runner.os == 'Linux'
+        env:
+          BEFORE: ${{ steps.pre.outputs.free-before }}
+          AFTER: ${{ steps.pre.outputs.free-after }}
+        run: |
+          echo "free space $BEFORE -> $AFTER"
+          [ ! -e /usr/share/dotnet ] || { echo "::error::/usr/share/dotnet is still there"; exit 1; }
+          [ "$AFTER" -gt "$BEFORE" ] || { echo "::error::no space gained"; exit 1; }
+
+      - name: A pinned version
+        uses: ./
+        with:
+          version: 0.6.3
+          only: pip
+      - name: Check the pinned version is on PATH
+        run: diskdiet version | grep -q '^diskdiet 0\.6\.3 '

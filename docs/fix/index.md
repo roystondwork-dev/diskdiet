@@ -52,6 +52,7 @@ Need more? `--older-than 7d` counts more as old; `--all` counts everything.
 - [Xcode DerivedData and simulators](xcode.md)
 - [Cargo, Go, Gradle, Maven](others.md)
 - [Playwright and Cypress downloads](browsers.md)
+- [GitHub Actions runners](github-actions.md)
 
 !!! tip "In VS Code"
     The [diskdiet extension](../vscode.md) notices "no space left on device" in the

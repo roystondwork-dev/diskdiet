@@ -138,6 +138,22 @@
           "type": "json",
           "path": "extensions/vscode/package-lock.json",
           "jsonpath": "$.packages[''].version"
+        },
+        {
+          "type": "generic",
+          "path": "README.md"
+        },
+        {
+          "type": "generic",
+          "path": "docs/guide/github-action.md"
+        },
+        {
+          "type": "generic",
+          "path": "docs/fix/github-actions.md"
+        },
+        {
+          "type": "generic",
+          "path": "docs/guide/scripting.md"
         }
       ]
     }

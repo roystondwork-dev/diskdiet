@@ -91,6 +91,7 @@ nav:
       - Xcode DerivedData and simulators: fix/xcode.md
       - Cargo, Go, Gradle, Maven: fix/others.md
       - Playwright and Cypress downloads: fix/browsers.md
+      - "GitHub Actions: no space left": fix/github-actions.md
   - Guides:
       - Scan and clean (CLI): guide/cli.md
       - What diskdiet cleans: guide/sources.md
@@ -99,6 +100,7 @@ nav:
       - AI assistants (MCP): mcp.md
       - Docker details: docker.md
       - Scripting and CI: guide/scripting.md
+      - GitHub Action: guide/github-action.md
   - Reference:
       - Commands:
           - diskdiet: commands/diskdiet.md

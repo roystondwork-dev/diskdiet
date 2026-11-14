@@ -72,6 +72,20 @@ fails with "no space left on device", it offers to free space right there
 ([details](docs/vscode.md)). Search **diskdiet** in the Extensions view, or install the
 `.vsix` from the [latest release](https://github.com/roystondwork-dev/diskdiet/releases/latest).
 
+## GitHub Action
+
+Free disk space on CI runners in one step: package and Docker caches, and optionally
+the preinstalled SDKs your job doesn't use (20–30 GB on GitHub-hosted Linux runners).
+Your project's `node_modules` is never touched.
+
+```yaml
+- uses: roystondwork-dev/diskdiet@v0.7.0 # x-release-please-version
+  with:
+    remove-preinstalled: android,dotnet,haskell,codeql
+```
+
+[Inputs, outputs and self-hosted runners](https://roystondwork-dev.github.io/diskdiet/guide/github-action/).
+
 ## AI assistants (MCP)
 
 Let Claude Code, Cursor, VS Code Copilot and other assistants see what is using disk
