@@ -7,6 +7,7 @@
 # temporary fake home folder, so neither the package managers nor diskdiet's
 # own default lookups can reach the machine's real caches.
 set -euo pipefail
+fixtures="$(cd "$(dirname "$0")" && pwd)/integration"
 
 # diskdiet cleans for real here. Make running it on a developer's machine a
 # deliberate choice, even though the fake home keeps real caches out of reach.
@@ -39,8 +40,15 @@ field() { "$dd" scan --json --only "$1" ${3:-} 2>/dev/null | jq -r ".sources[0].
 py=$(command -v python3 || command -v python)
 # Makes files and folders look 90 days old (portable, unlike touch -d).
 make_old() { "$py" -c 'import os,sys,time; t=time.time()-90*86400; [os.utime(p,(t,t)) for p in sys.argv[1:]]' "$@"; }
-# Global installs only on CI runners, never on a developer's machine.
-install_global() { if [ -n "${CI:-}" ]; then npm install -g --silent "$1" >/dev/null 2>&1 || true; fi; }
+# Yarn and pnpm, at the versions and hashes in integration/tools/package-lock.json,
+# installed into the scratch folder (never globally) with their own npm cache.
+mkdir -p "$work/tools"
+cp "$fixtures/tools/package.json" "$fixtures/tools/package-lock.json" "$work/tools/"
+if (cd "$work/tools" && npm_config_cache="$work/tools-cache" npm ci --silent --no-audit --no-fund >/dev/null 2>&1); then
+  PATH="$work/tools/node_modules/.bin:$PATH"
+else
+  echo "note: couldn't install Yarn and pnpm; their steps will be skipped" >&2
+fi
 
 # Every cache lives under $work, through each tool's own setting.
 export npm_config_cache="$work/npm-cache"
@@ -60,17 +68,18 @@ project() { # name → a node project with one dependency
 }
 
 step "npm: recent entries stay, --all clears, installs still work"
-project npm-app
-npm install --silent --no-audit --no-fund is-number@7.0.0 >/dev/null
+mkdir -p "$work/npm-app" && cd "$work/npm-app"
+cp "$fixtures/npm-app/package.json" "$fixtures/npm-app/package-lock.json" .
+npm ci --silent --no-audit --no-fund >/dev/null
 ln -s "$sentinel" "$npm_config_cache/_cacache/escape-link" 2>/dev/null || true
 [ "$(field npm bytes)" -gt 0 ] || fail "npm cache not found"
 [ "$(field npm prunableBytes '--older-than 1h')" = "0" ] || fail "fresh npm entries counted as old"
 pass "fresh entries are kept with --older-than 1h"
 "$dd" clean --only npm --all --yes >/dev/null
 npm cache verify >/dev/null || fail "npm cache verify failed after clean"
-rm -rf node_modules package-lock.json
-npm install --silent --no-audit --no-fund is-number@7.0.0 >/dev/null || fail "npm install failed after clean"
-pass "cache verifies and npm install works after --all"
+rm -rf node_modules
+npm ci --silent --no-audit --no-fund >/dev/null || fail "npm ci failed after clean"
+pass "cache verifies and npm ci works after --all"
 
 step "node_modules: old projects go, recent ones stay"
 mkdir -p "$work/projects"
@@ -93,7 +102,6 @@ make_old "$work/projects/kept/package.json" "$work/projects/kept"
 pass "--keep leaves a folder alone"
 
 step "Yarn 1"
-install_global yarn@1
 if command -v yarn >/dev/null 2>&1; then
   project yarn-app
   yarn add --silent is-number@7.0.0 >/dev/null 2>&1
@@ -107,7 +115,6 @@ else
 fi
 
 step "pnpm: only packages no project uses are pruned"
-install_global pnpm@10
 if command -v pnpm >/dev/null 2>&1; then
   project pnpm-app
   store="$work/pnpm-store"
