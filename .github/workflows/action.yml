@@ -12,6 +12,25 @@ permissions:
   contents: read
 
 jobs:
+  marketplace:
+    name: Marketplace rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # GitHub Marketplace refuses to list an action whose description is 125
+      # characters or more, or that lacks a name or branding.
+      - name: Check action.yml meets the Marketplace rules
+        run: |
+          desc=$(yq -r '.description' action.yml)
+          n=$(printf '%s' "$desc" | wc -m)
+          echo "description: $n characters"
+          [ "$n" -lt 125 ] || { echo "::error file=action.yml::description must be under 125 characters (is $n)"; exit 1; }
+          for k in .name .branding.icon .branding.color; do
+            [ "$(yq -r "$k // \"\"" action.yml)" != "" ] || { echo "::error file=action.yml::$k is missing"; exit 1; }
+          done
+
   action:
     name: Action (${{ matrix.os }})
     strategy:
