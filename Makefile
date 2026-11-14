@@ -62,10 +62,10 @@ fuzz: ## Run every fuzz target for FUZZTIME each.
 	scripts/fuzz.sh $(FUZZTIME)
 
 .PHONY: mutation
-mutation: ## Mutation-test the safety-critical packages (slow).
-	$(TOOL) gremlins unleash --workers 4 ./internal/fsx
-	$(TOOL) gremlins unleash --workers 4 ./internal/source
-	$(TOOL) gremlins unleash --workers 4 ./internal/units
+mutation: ## Mutation-test the safety-critical packages (slow); fails below 75% efficacy.
+	scripts/mutation.sh ./internal/fsx 75
+	scripts/mutation.sh ./internal/source 75
+	scripts/mutation.sh ./internal/units 75
 
 .PHONY: check
 check: lint test vuln ## Everything CI checks.

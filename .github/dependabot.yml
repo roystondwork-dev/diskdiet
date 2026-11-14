@@ -33,6 +33,9 @@ updates:
       # Must match the Node.js major that VS Code's extension host runs.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # typescript-eslint supports TypeScript 5 and 6 only; revisit when it supports 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       vscode-npm-deps:
         patterns: ["*"]
