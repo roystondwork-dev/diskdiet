@@ -55,7 +55,7 @@ schema version. A scan looks like:
 On GitHub Actions, use the [diskdiet action](github-action.md):
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.0 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
   with:
     remove-preinstalled: android,dotnet
 ```
