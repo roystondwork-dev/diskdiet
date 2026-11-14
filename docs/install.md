@@ -11,6 +11,8 @@ you already use.
 
 | How | Command |
 |---|---|
+| **Install script** (macOS, Linux) | `curl -fsSL https://roystondwork-dev.github.io/diskdiet/install.sh \| sh` |
+| **Install script** (Windows PowerShell) | `irm https://roystondwork-dev.github.io/diskdiet/install.ps1 \| iex` |
 | **npm** (any OS, nothing to install first) | `npx diskdiet` |
 | **PyPI** (any OS) | `pipx install diskdiet` or `uv tool install diskdiet` |
 | **Go** 1.26+ | `go install github.com/roystondwork-dev/diskdiet/cmd/diskdiet@latest` |

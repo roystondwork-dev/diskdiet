@@ -52,11 +52,18 @@ schema version. A scan looks like:
 
 ## Free space on CI runners
 
-GitHub's hosted runners fill up with caches during long jobs. Before a big build:
+On GitHub Actions, use the [diskdiet action](github-action.md):
 
 ```yaml
-- name: Free disk space
-  run: npx -y diskdiet clean --all --yes --only npm,pip,go,docker
+- uses: roystondwork-dev/diskdiet@v0.7.0 # x-release-please-version
+  with:
+    remove-preinstalled: android,dotnet
+```
+
+Elsewhere, run the CLI directly:
+
+```sh
+npx -y diskdiet clean --all --yes --skip node_modules,target
 ```
 
 ## A weekly clean on your machine

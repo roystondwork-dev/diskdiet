@@ -1,0 +1,158 @@
+name: diskdiet - free disk space
+description: Free disk space on CI runners by removing package caches (npm, pip, Go, Gradle, Docker…) and, optionally, unused preinstalled SDKs.
+author: Royston D
+branding:
+  icon: hard-drive
+  color: blue
+
+inputs:
+  older-than:
+    description: >-
+      Remove only what is unchanged for this long, e.g. 7d. Empty (the default) removes
+      everything in the chosen caches: on a CI runner, caches are rebuilt per job anyway.
+    required: false
+    default: ""
+  only:
+    description: >-
+      Only these diskdiet sources, comma-separated, e.g. "npm,pip,go,docker". Empty means
+      every cache except the ones in `skip`.
+    required: false
+    default: ""
+  skip:
+    description: >-
+      Sources to leave alone, comma-separated. The default keeps node_modules and target
+      folders, so the project being built in this job is never touched.
+    required: false
+    default: node_modules,target
+  docker-volumes:
+    description: Also remove unused Docker volumes.
+    required: false
+    default: "false"
+  remove-preinstalled:
+    description: >-
+      Linux GitHub-hosted runners only: preinstalled toolchains to remove when your job
+      doesn't need them, comma-separated: android, dotnet, haskell, codeql, swift, boost,
+      tool-cache (the hosted tool cache: Python, Node, Go, Ruby… set up by setup-* actions
+      runs from it), or "all". Typically frees 20–30 GB.
+    required: false
+    default: ""
+  dry-run:
+    description: Show what would be removed, and remove nothing.
+    required: false
+    default: "false"
+  version:
+    description: The diskdiet release to use, e.g. 0.6.3; the default is the latest release.
+    required: false
+    default: latest
+
+outputs:
+  freed-bytes:
+    description: Bytes diskdiet freed from caches.
+    value: ${{ steps.clean.outputs.freed-bytes }}
+  free-before:
+    description: Free bytes on the workspace's disk before.
+    value: ${{ steps.before.outputs.free }}
+  free-after:
+    description: Free bytes on the workspace's disk after.
+    value: ${{ steps.after.outputs.free }}
+
+runs:
+  using: composite
+  steps:
+    # The installers verify the download against the release's checksums. They come
+    # from the action's own checkout, so they match the action version you pinned.
+    - name: Install diskdiet
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        DISKDIET_INSTALL_DIR: ${{ runner.temp }}/diskdiet
+        DISKDIET_VERSION: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        INSTALL_SH: ${{ github.action_path }}/docs/install.sh
+      run: |
+        sh "$INSTALL_SH"
+        echo "$DISKDIET_INSTALL_DIR" >> "$GITHUB_PATH"
+    - name: Install diskdiet
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        DISKDIET_INSTALL_DIR: ${{ runner.temp }}\diskdiet
+        DISKDIET_VERSION: ${{ inputs.version != 'latest' && inputs.version || '' }}
+        INSTALL_PS1: ${{ github.action_path }}\docs\install.ps1
+      run: |
+        & $env:INSTALL_PS1
+        Add-Content -Path $env:GITHUB_PATH -Value $env:DISKDIET_INSTALL_DIR
+
+    - name: Free space before
+      id: before
+      shell: bash
+      run: |
+        free=$(df -Pk "$GITHUB_WORKSPACE" 2>/dev/null | awk 'NR == 2 { print $4 * 1024 }')
+        echo "free=${free:-0}" >> "$GITHUB_OUTPUT"
+
+    - name: Clean caches
+      id: clean
+      shell: bash
+      env:
+        OLDER_THAN: ${{ inputs.older-than }}
+        ONLY: ${{ inputs.only }}
+        SKIP: ${{ inputs.skip }}
+        VOLUMES: ${{ inputs.docker-volumes }}
+        DRY_RUN: ${{ inputs.dry-run }}
+      run: |
+        args=(clean --json)
+        if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); else args+=(--yes); fi
+        if [ -n "$OLDER_THAN" ]; then args+=(--older-than "$OLDER_THAN"); else args+=(--all); fi
+        [ -n "$ONLY" ] && args+=(--only "$ONLY")
+        [ -n "$SKIP" ] && args+=(--skip "$SKIP")
+        [ "$VOLUMES" = "true" ] && args+=(--volumes)
+        # Exit code 3 means some items couldn't be removed: worth a warning, not a failure.
+        code=0
+        diskdiet "${args[@]}" > "$RUNNER_TEMP/diskdiet.json" || code=$?
+        if [ "$code" -ne 0 ] && [ "$code" -ne 3 ]; then exit "$code"; fi
+        [ "$code" -eq 3 ] && echo "::warning::diskdiet couldn't remove some items; see the step output"
+        freed=$(jq -r '.freedBytes // 0' "$RUNNER_TEMP/diskdiet.json")
+        echo "freed-bytes=${freed}" >> "$GITHUB_OUTPUT"
+        # One line per source: what was freed (or, in a dry run, what would be).
+        jq -r 'def gb: (. / 1e9 * 10 | floor / 10 | tostring) + " GB";
+          if .dryRun then (.plan[] | "\(.name): would free \(.prunableBytes | gb)")
+          else (.results[] | "\(.name): freed \(.freedBytes | gb)\(if .skipped then " (skipped: \(.skipped))" else "" end)") end' \
+          "$RUNNER_TEMP/diskdiet.json"
+
+    - name: Remove preinstalled toolchains
+      if: inputs.remove-preinstalled != '' && runner.os == 'Linux' && inputs.dry-run != 'true'
+      shell: bash
+      env:
+        REMOVE: ${{ inputs.remove-preinstalled }}
+      run: |
+        if [ "${RUNNER_ENVIRONMENT:-}" != "github-hosted" ]; then
+          echo "::warning::remove-preinstalled only runs on GitHub-hosted runners; skipped"
+          exit 0
+        fi
+        want() { [ "$REMOVE" = "all" ] || [[ ",${REMOVE// /}," == *",$1,"* ]]; }
+        gone() { for p in "$@"; do [ -e "$p" ] && sudo rm -rf -- "$p" && echo "removed $p"; done; true; }
+        want android && gone /usr/local/lib/android
+        want dotnet && gone /usr/share/dotnet
+        want haskell && gone /opt/ghc /usr/local/.ghcup
+        want codeql && gone /opt/hostedtoolcache/CodeQL
+        want swift && gone /usr/share/swift
+        want boost && gone /usr/local/share/boost
+        want tool-cache && [ -n "${AGENT_TOOLSDIRECTORY:-}" ] && gone "$AGENT_TOOLSDIRECTORY"
+        true
+
+    - name: Free space after
+      id: after
+      shell: bash
+      env:
+        BEFORE: ${{ steps.before.outputs.free }}
+      run: |
+        free=$(df -Pk "$GITHUB_WORKSPACE" 2>/dev/null | awk 'NR == 2 { print $4 * 1024 }')
+        echo "free=${free:-0}" >> "$GITHUB_OUTPUT"
+        gb() { awk -v b="$1" 'BEGIN { printf "%.1f GB", b / 1e9 }'; }
+        {
+          echo "### diskdiet"
+          echo ""
+          echo "| Free before | Free after | Gained |"
+          echo "|---|---|---|"
+          echo "| $(gb "${BEFORE:-0}") | $(gb "${free:-0}") | $(gb $(( ${free:-0} - ${BEFORE:-0} ))) |"
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "free space: $(gb "${BEFORE:-0}") → $(gb "${free:-0}")"
