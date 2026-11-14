@@ -83,7 +83,9 @@ func (s *pnpmSource) Scan(ctx context.Context, o Options) *Report {
 		r.Items += u.Files
 		plan.stores = append(plan.stores, store)
 		files, _ := fsx.DirSize(ctx, filepath.Join(store, "files"), fsx.Options{CountLinks: true})
-		if files.Exclusive > 0 {
+		// Only files no project links to can be pruned; the store's folders
+		// alone (4 kB each on Linux) are not something to free.
+		if files.ExclusiveFiles > 0 {
 			r.PrunableBytes += files.Exclusive
 			r.Estimate = true
 			plan.prune = true
