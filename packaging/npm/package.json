@@ -1,6 +1,6 @@
 {
   "name": "diskdiet",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "See where your developer disk space went and get it back safely: npm, Yarn, pnpm, Bun, pip, uv, Cargo, Go, Gradle, Maven, Playwright, Cypress, Xcode and Docker caches, plus forgotten node_modules and target folders.",
   "mcpName": "io.github.roystondwork-dev/diskdiet",
   "keywords": [

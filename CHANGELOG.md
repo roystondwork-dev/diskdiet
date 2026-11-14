@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/roystondwork-dev/diskdiet/compare/v0.7.0...v0.7.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **action:** shorten the description so GitHub Marketplace accepts it ([#33](https://github.com/roystondwork-dev/diskdiet/issues/33)) ([6d4ea07](https://github.com/roystondwork-dev/diskdiet/commit/6d4ea07fe2315adf3fb1119ec3292c536c8ef28b))
+
 ## [0.7.0](https://github.com/roystondwork-dev/diskdiet/compare/v0.6.3...v0.7.0) (2026-11-14)
 
 

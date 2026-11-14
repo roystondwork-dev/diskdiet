@@ -2,7 +2,7 @@
   "name": "diskdiet-vscode",
   "displayName": "diskdiet - Free Developer Disk Space",
   "description": "See what npm, pnpm, Yarn, pip, Cargo, Go, Gradle and Docker caches and old node_modules use, and free disk space safely. Offers a fix when a command runs out of disk.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "publisher": "diskdiet",
   "icon": "media/icon.png",
   "galleryBanner": {

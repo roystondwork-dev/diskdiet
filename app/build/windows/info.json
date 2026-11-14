@@ -1,12 +1,12 @@
 {
 	"fixed": {
-		"file_version": "0.7.0",
-		"product_version": "0.7.0"
+		"file_version": "0.7.1",
+		"product_version": "0.7.1"
 	},
 	"info": {
 		"0409": {
-			"FileVersion": "0.7.0",
-			"ProductVersion": "0.7.0",
+			"FileVersion": "0.7.1",
+			"ProductVersion": "0.7.1",
 			"CompanyName": "diskdiet contributors",
 			"FileDescription": "See where your developer disk space went, and get it back safely",
 			"LegalCopyright": "(c) 2026 Royston D and diskdiet contributors",
