@@ -241,6 +241,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [GOVERNANCE.md](GOVERNANCE.md) and
 report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 diskdiet collects no data ([privacy](docs/privacy.md)).
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by
+[SignPath Foundation](https://signpath.org). Who builds, reviews and approves signed
+releases: [code signing policy](https://roystondwork-dev.github.io/diskdiet/code-signing/).
+
 ## License
 
 [MIT](LICENSE) © 2026 Royston D and diskdiet contributors

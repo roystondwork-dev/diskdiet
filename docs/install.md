@@ -64,4 +64,31 @@ See [AI assistants (MCP)](mcp.md).
 ## Verify what you downloaded
 
 Every release is signed and has SBOMs and build provenance: see
-[Verifying downloads](verifying.md).
+[Verifying downloads](verifying.md) and the [code signing policy](code-signing.md).
+
+## Uninstall
+
+diskdiet changes nothing outside the files below, so removing them removes it completely.
+
+**The CLI**, the way you installed it:
+
+| Installed with | Remove with |
+|---|---|
+| Install script (macOS, Linux) | `rm ~/.local/bin/diskdiet` (or the `DISKDIET_INSTALL_DIR` you chose) |
+| Install script (Windows) | Delete `%LOCALAPPDATA%\Programs\diskdiet`, then remove that folder from your user `Path` (Start → "Edit environment variables for your account") |
+| npm | Nothing to do for `npx`; `npm uninstall -g diskdiet` if you installed it globally |
+| PyPI | `pipx uninstall diskdiet` or `uv tool uninstall diskdiet` |
+| Go | `rm "$(go env GOPATH)/bin/diskdiet"` |
+| Linux packages | `sudo apt remove diskdiet`, `sudo dnf remove diskdiet` or `sudo apk del diskdiet` |
+
+**The desktop app.** First, in the tray menu, untick *Start at login* if you turned it on.
+
+- **Windows:** Settings → Apps → Installed apps → diskdiet → Uninstall.
+- **macOS:** drag diskdiet from Applications to the Trash.
+- **Linux:** delete the `.AppImage` file.
+
+Its settings file can then be deleted too: `diskdiet/settings.json` in your user settings
+folder (`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `~/.config` on
+Linux).
+
+**The VS Code extension:** Extensions → diskdiet → Uninstall.

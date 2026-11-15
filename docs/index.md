@@ -101,3 +101,6 @@ diskdiet is MIT-licensed and [developed on GitHub](https://github.com/roystondwo
 Releases are signed and come with SBOMs and build provenance
 ([verify a download](verifying.md)), and diskdiet collects no data
 ([privacy](privacy.md)).
+
+**[Code signing policy](code-signing.md):** free code signing provided by
+[SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).

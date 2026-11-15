@@ -112,4 +112,5 @@ nav:
   - Trust:
       - Security: security.md
       - Verifying downloads: verifying.md
+      - Code signing policy: code-signing.md
       - Privacy: privacy.md
