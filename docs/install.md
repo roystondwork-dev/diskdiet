@@ -65,9 +65,8 @@ See [AI assistants (MCP)](mcp.md).
 
 Every release is signed and has SBOMs and build provenance: see
 [Verifying downloads](verifying.md).
-
-**[Code signing policy](code-signing.md):** free code signing provided by
-[SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+Windows downloads aren't code signed yet: see [Code signing](code-signing.md) for how to
+check one and get past the warning.
 
 ## Uninstall
 
