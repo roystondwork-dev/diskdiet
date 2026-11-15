@@ -64,7 +64,10 @@ See [AI assistants (MCP)](mcp.md).
 ## Verify what you downloaded
 
 Every release is signed and has SBOMs and build provenance: see
-[Verifying downloads](verifying.md) and the [code signing policy](code-signing.md).
+[Verifying downloads](verifying.md).
+
+**[Code signing policy](code-signing.md):** free code signing provided by
+[SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
 
 ## Uninstall
 
