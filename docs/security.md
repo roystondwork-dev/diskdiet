@@ -4,6 +4,9 @@ description: diskdiet's security policy, how to report a vulnerability, and how 
 
 # Security
 
+diskdiet meets the [OpenSSF Best Practices "passing" criteria](https://www.bestpractices.dev/projects/16696)
+and is scored by [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/roystondwork-dev/diskdiet).
+
 ## Supported versions
 
 | Version | Supported |
