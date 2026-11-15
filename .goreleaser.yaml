@@ -8,6 +8,17 @@ before:
   hooks:
     - go mod download
     - ./scripts/release-assets.sh
+    # Windows version info (product name, version, icon) for diskdiet.exe: code
+    # signing checks it, and Explorer shows it. Go links the .syso files into
+    # Windows builds only.
+    - >-
+      go tool -modfile=tools/go.mod go-winres simply --arch amd64,arm64
+      --out cmd/diskdiet/rsrc --manifest cli --icon app/build/windows/icon.ico
+      --product-name diskdiet --original-filename diskdiet.exe
+      --file-description "diskdiet - free developer disk space"
+      --copyright "(c) Royston D and diskdiet contributors, MIT license"
+      --product-version {{ .Major }}.{{ .Minor }}.{{ .Patch }}.0
+      --file-version {{ .Major }}.{{ .Minor }}.{{ .Patch }}.0
 
 builds:
   - id: diskdiet
