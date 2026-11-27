@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.2](https://github.com/roystondwork-dev/diskdiet/compare/v0.7.1...v0.7.2) (2026-11-27)
+
+
+### Documentation
+
+* add the OpenSSF Best Practices badge ([#37](https://github.com/roystondwork-dev/diskdiet/issues/37)) ([aa67f4c](https://github.com/roystondwork-dev/diskdiet/commit/aa67f4ced8db8ea3ce385ae19ed94b4b30e0e8bd))
+* code signing policy and uninstall instructions for SignPath ([#38](https://github.com/roystondwork-dev/diskdiet/issues/38)) ([e19f10a](https://github.com/roystondwork-dev/diskdiet/commit/e19f10af01ae64095e2a47ea737ce5be0d88beb7))
+* link the GitHub Marketplace listing ([#35](https://github.com/roystondwork-dev/diskdiet/issues/35)) ([c11166a](https://github.com/roystondwork-dev/diskdiet/commit/c11166ab43023ef1620135244796fda4407cb6a5))
+* Windows downloads aren't code signed; remove the SignPath attribution ([#40](https://github.com/roystondwork-dev/diskdiet/issues/40)) ([3321256](https://github.com/roystondwork-dev/diskdiet/commit/3321256b42fcf223ce7e612d0864cb346f717d52))
+
+
+### Build & Release
+
+* **deps:** Bump svelte in /app/frontend in the app-npm-deps group ([#42](https://github.com/roystondwork-dev/diskdiet/issues/42)) ([9cc1ca6](https://github.com/roystondwork-dev/diskdiet/commit/9cc1ca6f5eedfcc048ccb446d0f599594ddee595))
+* **deps:** Bump the vscode-npm-deps group across 1 directory with 5 updates ([#43](https://github.com/roystondwork-dev/diskdiet/issues/43)) ([dffc93d](https://github.com/roystondwork-dev/diskdiet/commit/dffc93dcffddb052de44da86cfdf24aee16342b8))
+* Windows version info for diskdiet.exe ([#39](https://github.com/roystondwork-dev/diskdiet/issues/39)) ([a70c642](https://github.com/roystondwork-dev/diskdiet/commit/a70c6427e5b1a1b1d9d2f44f5c509dfee2aae30c))
+
 ## [0.7.1](https://github.com/roystondwork-dev/diskdiet/compare/v0.7.0...v0.7.1) (2026-11-14)
 
 

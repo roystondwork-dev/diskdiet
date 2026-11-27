@@ -11,7 +11,7 @@ dependencies, or a few large `npm install`s fill that quickly, and the job fails
 Add one step at the start of the job:
 
 ```yaml
-- uses: roystondwork-dev/diskdiet@v0.7.1 # x-release-please-version
+- uses: roystondwork-dev/diskdiet@v0.7.2 # x-release-please-version
   with:
     remove-preinstalled: android,dotnet,haskell,codeql
 ```
