@@ -64,7 +64,8 @@ function settings(): Settings {
 class Diskdiet implements vscode.TreeDataProvider<Node>, vscode.Disposable {
   private readonly changed = new vscode.EventEmitter<Node | undefined>();
   readonly onDidChangeTreeData = this.changed.event;
-  private readonly disposables: vscode.Disposable[] = [];
+  // Anything with dispose(): status bar items and event emitters aren't vscode.Disposable instances.
+  private readonly disposables: { dispose(): unknown }[] = [];
   private readonly statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 50);
   private readonly home = os.homedir();
   private scan: ScanData | undefined;
